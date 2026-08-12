@@ -29,7 +29,7 @@ Non include gli acquisti di masterclass, che vivono su una tabella separata
 | `stripePaymentIntentId` | `stripe_payment_intent_id` | serve a correlare l'evento `charge.updated` |
 | `feePending` | `fee_pending` | `true` se l'importo salvato è ancora **lordo** |
 | `paymentMethod` | `payment_method` | `CRYPTO` \| `STRIPE` \| `PAYPAL` (mai usato) |
-| `stripeAccount` | `stripe_account` | `LILLO` \| `DANNY`; `NULL` sulle righe crypto ([[Bilanciamento degli account Stripe]]) |
+| `stripeAccount` | `stripe_account` | `PRIMARIO` \| `SECONDARIO`; `NULL` sulle righe crypto ([[Bilanciamento degli account Stripe]]) |
 | `transactionType` | `transaction_type` | `SUPPORTER_MEMBER` \| `GOLD_SUPPORTER_MEMBER` |
 | `statoVerifica` / `status` | `stato_verifica`, `status` | entrambi `PENDING`\|`COMPLETED`\|`FAILED` |
 | `walletMittente` | `wallet_mittente` | crypto: indirizzo `from`. Stripe: ci viene messo lo *username* Discord |

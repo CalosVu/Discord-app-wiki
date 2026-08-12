@@ -18,8 +18,8 @@ l'interazione passa dal bot Discord, non dall'HTTP.
 
 | Metodo | Percorso | Chi lo chiama | Protezione |
 |---|---|---|---|
-| `POST` | `/api/webhooks/stripe` | Stripe (account LILLO) | firma webhook di Lillo |
-| `POST` | `/api/webhooks/stripe/danny` | Stripe (account DANNY) | firma webhook di Danny |
+| `POST` | `/api/webhooks/stripe` | Stripe (account PRIMARIO) | firma webhook del primario |
+| `POST` | `/api/webhooks/stripe/secondario` | Stripe (account SECONDARIO) | firma webhook del secondario |
 | `POST` | `/api/webhooks/stripe/masterclass/relatore/{relatoreId}` | Stripe (account del relatore) | firma webhook di quel relatore |
 | `POST` | `/api/webhooks/stripe/masterclass` | Stripe Connect — modello **congelato** | firma webhook Connect |
 | ~~`GET`~~ | ~~`/api/verifica-accesso/{discordId}`~~ | **rimosso** il 2026-08-12 ([[Integrazione VuTracker]]) | — |

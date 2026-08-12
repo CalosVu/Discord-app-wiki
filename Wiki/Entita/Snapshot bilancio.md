@@ -41,7 +41,7 @@ saldi, fatto ogni volta da zero su `payments` e `track_prelievi` ([[Reportistica
 
 1. Decommentare la classe e lo `@Scheduled`.
 2. **Estendere l'enum in DDL** a `STRIPE`, altrimenti gli snapshot Stripe non sono rappresentabili.
-3. Decidere se lo snapshot va **per account Stripe** (Lillo/Danny) come i saldi attuali, oppure
+3. Decidere se lo snapshot va **per account Stripe** (primario/secondario) come i saldi attuali, oppure
    aggregato: oggi la colonna non lo prevede ([[Bilanciamento degli account Stripe]]).
 4. Implementare `contaTransazioni` e `contaUtentiAttivi`, che nel codice commentato ritornano `0`.
 

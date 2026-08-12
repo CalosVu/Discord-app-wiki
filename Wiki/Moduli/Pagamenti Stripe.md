@@ -35,8 +35,8 @@ con il webhook.
 
 | Endpoint | Account |
 |---|---|
-| `POST /api/webhooks/stripe` | LILLO (storico, path invariato) |
-| `POST /api/webhooks/stripe/danny` | DANNY |
+| `POST /api/webhooks/stripe` | PRIMARIO (storico, path invariato) |
+| `POST /api/webhooks/stripe/secondario` | SECONDARIO (path cambiato il 2026-08-12, era `/danny`) |
 
 Entrambi verificano la firma con il webhook secret **di quell'account** e usano la sua chiave per
 ogni chiamata alle API. Gli eventi gestiti sono **due soli**: `checkout.session.completed` e

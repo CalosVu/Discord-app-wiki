@@ -68,7 +68,9 @@ Particolarità: `payments` ha **due** FK verso `users` — su `user_id` e su `di
 | `V5__testi_istanza.sql` | disclaimer e testi con riferimenti espliciti |
 | `V6__tx_hash_lunghezza.sql` | `payments.tx_hash` da `varchar(66)` a `varchar(128)` |
 | `V7__flag_batch_abbonamenti.sql` | chiave `BATCH_ABBONAMENTI_ABILITATO` in `server_config` |
-| `V8__account_stripe_neutri_e_backup.sql` | `stripe_account` da `LILLO`/`DANNY` a `PRIMARIO`/`SECONDARIO`; rinomina la chiave di V7 in `BATCH_VERIFICA_ABBONAMENTI`; aggiunge `BACKUP_DB_ABILITATO` e le quattro `RUOLO_*` |
+| `V8__account_stripe_neutri_e_backup.sql` | `stripe_account` da `LILLO`/`DANNY` a `PRIMARIO`/`SECONDARIO`; rinomina la chiave di V7 in `BATCH_VERIFICA_ABBONAMENTI`; aggiunge `BACKUP_DB_ABILITATO` e le cinque `RUOLO_*` |
+| `V9__pulizia_config_inutilizzate.sql` | elimina `PERCENTUALE_COMMISSIONI_STRIPE` e `QUOTA_FISSA_COMM_STRIPE`, che nessun codice legge |
+| `V10__percentuale_stripe_secondario.sql` | aggiunge `PERCENTUALE_STRIPE_SECONDARIO` ([[Bilanciamento degli account Stripe]]) |
 
 ### Come si cambiano i valori di un `ENUM` senza perdere i dati
 
@@ -137,9 +139,18 @@ allinea le due situazioni.
 
 ## Tabelle non mappate
 
-`user_account` (24 righe in produzione) **non corrisponde ad alcuna entità JPA**: è un residuo.
-Hibernate con `validate` ignora le tabelle in più, quindi non causa problemi, ma non è documentata
-altrove perché nessun codice la usa.
+`user_account` (24 righe in produzione) **non corrisponde ad alcuna entità JPA** e nessuna riga di
+codice la nomina — ma **non è un residuo**: è un registro di gestione interna, compilato a mano.
+
+Raccoglie gli utenti che hanno aperto un account sugli **exchange con cui esiste un'affiliazione**,
+con il loro username TradingView e gli indicatori attualmente attivi. Serve a sapere a chi
+spettano gli indicatori e a chi è riconducibile una commissione di affiliazione.
+
+L'ipotesi è di gestirla un domani da interfaccia; finché non accade resta alimentata manualmente.
+Hibernate con `validate` ignora le tabelle in più, quindi la sua presenza non disturba l'avvio.
+
+⚠️ **Non cancellarla** durante le pulizie dello schema: l'assenza di riferimenti nel codice la fa
+sembrare orfana, ma i dati che contiene non sono ricostruibili da nessun'altra parte.
 
 ## Le regole di migrazione (con Flyway, dal 2026-07-25)
 

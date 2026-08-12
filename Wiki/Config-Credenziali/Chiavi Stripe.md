@@ -20,8 +20,8 @@ Questa pagina elenca quali sono, a cosa servono e come si ruotano.
 
 | Insieme | Variabili | Chi le usa |
 |---|---|---|
-| **Supporter — Lillo** (storico) | `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` | [[Pagamenti Stripe]]; la secret key è anche la `Stripe.apiKey` globale |
-| **Supporter — Danny** | `STRIPE_DANNY_SECRET_KEY`, `STRIPE_DANNY_WEBHOOK_SECRET` | [[Bilanciamento degli account Stripe]]. **Default vuoto**: se non valorizzate, tutto va su Lillo |
+| **Supporter — Primario** (storico) | `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` | [[Pagamenti Stripe]]; la secret key è anche la `Stripe.apiKey` globale |
+| **Supporter — Secondario** | `STRIPE_SECONDARIO_SECRET_KEY`, `STRIPE_SECONDARIO_WEBHOOK_SECRET` | [[Bilanciamento degli account Stripe]]. **Default vuoto**: se non valorizzate, tutto va sul primario |
 | **Masterclass Connect** (congelato) | `STRIPE_MC_SECRET_KEY`, `STRIPE_MC_WEBHOOK_SECRET` | solo con `MASTERCLASS_PAYMENT_MODE=connect`. Default vuoto |
 | **Masterclass per relatore** (attivo) | `STRIPE_MC_SK_<relatoreId>`, `STRIPE_MC_WHSEC_<relatoreId>` | [[Sistema masterclass]] |
 
@@ -56,12 +56,16 @@ resto del codice.
 | Secret key | rigenerare nel Dashboard, aggiornare la variabile, riavviare |
 | Webhook secret | se si **edita** l'URL dell'endpoint esistente, il `whsec_` **non cambia**; se si **ricrea** l'endpoint, cambia e va riportato nella variabile |
 
-Vale per ogni account: Lillo, Danny e **ciascun** relatore. Al cambio dominio è l'errore più
+Vale per ogni account: primario, secondario e **ciascun** relatore. Al cambio dominio è l'errore più
 frequente ([[Runbook cambio dominio]]).
+
+⚠️ Il path del webhook del secondario è cambiato il 2026-08-12 da `/api/webhooks/stripe/danny` a
+**`/api/webhooks/stripe/secondario`**: va aggiornato nel Dashboard Stripe prima di valorizzare le
+chiavi, altrimenti i pagamenti su quell'account non verranno mai notificati all'applicazione.
 
 ## Isolamento fra i flussi
 
-La `Stripe.apiKey` globale è **solo** quella di Lillo. Tutti gli altri flussi passano
+La `Stripe.apiKey` globale è **solo** quella del primario. Tutti gli altri flussi passano
 `RequestOptions.setApiKey(...)` esplicitamente a ogni chiamata: nessuna chiamata usa per sbaglio la
 chiave sbagliata. Se una chiave manca, il codice solleva `IllegalStateException` con **il nome esatto
 della variabile attesa** — messaggio prezioso in diagnosi.

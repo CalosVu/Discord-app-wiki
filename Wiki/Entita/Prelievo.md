@@ -24,8 +24,8 @@ Il campo **metodo** accetta tre valori testuali:
 | Valore digitato | `metodo_pagamento` | `stripe_account` |
 |---|---|---|
 | `CRYPTO` | `CRYPTO` | `NULL` |
-| `STRIPE_LILLO` | `STRIPE` | `LILLO` |
-| `STRIPE_DANNY` | `STRIPE` | `DANNY` |
+| `STRIPE_PRIMARIO` | `STRIPE` | `PRIMARIO` |
+| `STRIPE_SECONDARIO` | `STRIPE` | `SECONDARIO` |
 
 Qualsiasi altro valore viene rifiutato. La valuta viene dedotta: `USDT` per crypto, `EUR` per Stripe.
 
@@ -44,7 +44,7 @@ Prima del salvataggio, in ordine:
 ## ⚠️ La verifica on-chain vale anche per i prelievi Stripe
 
 Il controllo al punto 4 è **incondizionato**: viene eseguito anche quando il metodo è
-`STRIPE_LILLO`/`STRIPE_DANNY`. Per registrare un prelievo Stripe bisogna comunque fornire un hash e
+`STRIPE_PRIMARIO`/`STRIPE_SECONDARIO`. Per registrare un prelievo Stripe bisogna comunque fornire un hash e
 un wallet formalmente validi e verificabili su Arbitrum. È un vincolo del flusso attuale, non una
 scelta documentata altrove.
 

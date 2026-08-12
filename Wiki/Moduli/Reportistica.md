@@ -5,7 +5,7 @@ alias: [report, saldi, ReportService]
 tag: [dominio/admin]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-13
 stato: stabile
 ---
 
@@ -31,9 +31,24 @@ Tutti i filtri sono su `stato_verifica = 'COMPLETED'` per i [[Pagamento|pagament
 
 | Report | Contenuto |
 |---|---|
-| **Report Saldo** | tre sezioni — Crypto (USDT), Stripe **Lillo** (EUR), Stripe **Danny** (EUR) — ognuna con depositi, prelievi, saldo. Nessuna data: è il saldo *ad adesso* |
+| **Report Saldo** | tre sezioni — Crypto (USDT), Stripe **Primario** (EUR), Stripe **Secondario** (EUR) — ognuna con depositi, prelievi, saldo. Nessuna data: è il saldo *ad adesso*. Le due sezioni Stripe mostrano nel titolo quota attuale e obiettivo (vedi sotto) |
 | **Report Pagamenti** | dato un range: totale e numero transazioni, separati per Crypto e Stripe |
 | **Report Completo** | come sopra, più il **saldo netto del periodo** e il numero di **abbonati attivi** |
+
+### La ripartizione nel titolo delle sezioni Stripe
+
+```
+🔸 STRIPE PRIMARIO — 62,50% (obiettivo 70%)
+🔸 STRIPE SECONDARIO — 37,50% (obiettivo 30%)
+```
+
+La percentuale è la quota di quell'account sul **saldo netto complessivo** dei due conti Stripe;
+l'obiettivo è `PERCENTUALE_STRIPE_SECONDARIO` ([[Tabella server_config]]). Serve a sapere in
+anticipo dove finirà il prossimo pagamento: nell'esempio il secondario è sopra il suo obiettivo,
+quindi toccherà al primario ([[Bilanciamento degli account Stripe]]).
+
+Quando non c'è nulla da ripartire — nessun incasso, o tutto prelevato — i titoli restano senza
+percentuale, invece di mostrare uno `0%` che farebbe pensare a uno sbilanciamento inesistente.
 
 Il numero di abbonati attivi è `countByDataScadenzaIscrizioneAfter(adesso)`: **non è filtrato per
 periodo** né per metodo. Nel Report Completo compare sotto entrambe le sezioni ma è un solo numero

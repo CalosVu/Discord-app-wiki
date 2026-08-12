@@ -33,7 +33,7 @@ ignorato.
 | Voce | Cosa fa |
 |---|---|
 | **Salva Prelievo** | modale a 5 campi per registrare un'uscita → [[Prelievo]] |
-| **Report Saldo** | tre sezioni: Crypto, Stripe **Lillo**, Stripe **Danny** — depositi, prelievi, saldo |
+| **Report Saldo** | tre sezioni: Crypto, Stripe **Primario**, Stripe **Secondario** — depositi, prelievi, saldo. Le sezioni Stripe mostrano nel titolo quota attuale e obiettivo di ripartizione |
 | **Report Pagamenti** | modale con range di date → totali e numero transazioni, crypto e Stripe |
 | **Report Completo** | come sopra, più saldo netto del periodo e abbonati attivi |
 | **Scadenze Mese** | elenco degli utenti in scadenza nel mese corrente, con data |
@@ -74,7 +74,7 @@ Dopo ogni operazione il menu viene **rinviato in chat** (`resendMenu`), così no
 ## Dettaglio: Salva Prelievo
 
 Modale con **importo**, **metodo pagamento**, **wallet destinatario**, **hash transazione**,
-**descrizione**. Il campo metodo accetta `CRYPTO`, `STRIPE_LILLO` o `STRIPE_DANNY`: per Stripe serve
+**descrizione**. Il campo metodo accetta `CRYPTO`, `STRIPE_PRIMARIO` o `STRIPE_SECONDARIO`: per Stripe serve
 a imputare il prelievo all'account giusto ([[Bilanciamento degli account Stripe]]).
 
 ⚠️ La verifica on-chain dell'hash viene eseguita **anche per i prelievi Stripe**: vedi [[Prelievo]]

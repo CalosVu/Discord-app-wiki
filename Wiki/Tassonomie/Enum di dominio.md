@@ -57,13 +57,16 @@ usati. Tutte le somme dei prelievi filtrano su `COMPLETATO` ([[Prelievo]]).
 
 | Valore | Significato |
 |---|---|
-| `LILLO` | account storico; tutte le righe Stripe preesistenti sono state migrate qui |
-| `DANNY` | secondo account, per bilanciare gli incassi |
+| `PRIMARIO` | account storico; tutte le righe Stripe preesistenti sono state migrate qui |
+| `SECONDARIO` | secondo account, per ripartire gli incassi |
 
 `NULL` sulle righe crypto. Vedi [[Bilanciamento degli account Stripe]].
 
-⚠️ In DDL **deve** essere `ENUM('LILLO','DANNY')`, non `VARCHAR`: con `ddl-auto: validate` una
-colonna `VARCHAR` fa **fallire il boot** ([[Schema del database]]).
+⚠️ In DDL **deve** essere `ENUM('PRIMARIO','SECONDARIO')`, non `VARCHAR`: con `ddl-auto: validate`
+una colonna `VARCHAR` fa **fallire il boot** ([[Schema del database]]).
+
+I valori si chiamavano `LILLO` e `DANNY` fino al 2026-08-12: erano i nomi dei titolari dei conti, e
+la migration `V8` li ha resi neutri.
 
 ## `MotivoPendenza`
 

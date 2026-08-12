@@ -34,6 +34,7 @@ senza deploy né riavvio. Per il funzionamento del meccanismo vedi [[Configurazi
 | — | `RUOLO_NEW_ENTRY` | `GUEST` | `DISCORD_GUEST_ROLE` | `RuoliDiscordService` | ruolo di chi entra nel server |
 | — | `RUOLO_ADMIN` | `ADMIN` | `DISCORD_ADMIN_ROLE` | `RuoliDiscordService` | ruolo degli amministratori |
 | — | `RUOLO_MODERATORE` | `MODERATORE` | — | ⚠️ **nessuno** | predisposto, nessuna funzionalità lo legge |
+| — | `PERCENTUALE_STRIPE_SECONDARIO` | `30` | `50` | `StripeAccountSelector` | quota di incassi Stripe da tenere sull'account secondario |
 
 I valori nella colonna «Valore iniziale» sono quelli della migration `V2`, tranne l'ultimo che
 arriva da `V7`. In produzione possono essere diversi: `V2` è marcata come baseline e non viene
@@ -124,6 +125,12 @@ troppo breve rischia che l'acquirente non riesca a scaricare ([[Storage R2]]).
 **I tre flag booleani** — la conversione è `Boolean::parseBoolean`: qualsiasi valore diverso da
 `"true"` (case-insensitive) viene letto come `false`. Un `"1"` **non** vale `true`. Vedi
 [[Blocco dei pagamenti]].
+
+**`PERCENTUALE_STRIPE_SECONDARIO`** decide quanta parte degli incassi Stripe deve stare sul secondo
+account: si intende **sugli euro**, non sul numero di transazioni. `50` riproduce la ripartizione
+paritaria che era l'unico comportamento possibile prima di `V10`. Valori fuori da 0-100 vengono
+ignorati con un warning e si ricade sul 50%. Nessun effetto finché il secondo account non ha le
+chiavi. Vedi [[Bilanciamento degli account Stripe]] per la formula e i casi limite.
 
 ## Regole operative
 

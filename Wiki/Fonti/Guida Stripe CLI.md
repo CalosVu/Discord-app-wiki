@@ -38,7 +38,7 @@ Dashboard.
 
 ## Varianti per i flussi di questo progetto
 
-- **Supporter, secondo account:** puntare il forward a `/api/webhooks/stripe/danny` usando la chiave
+- **Supporter, secondo account:** puntare il forward a `/api/webhooks/stripe/secondario` usando la chiave
   di quell'account (vedi [[Bilanciamento degli account Stripe]]).
 - **Masterclass, modello attivo "direct":** un endpoint per relatore →
   `--forward-to localhost:8080/api/webhooks/stripe/masterclass/relatore/{relatoreId}` con la chiave
