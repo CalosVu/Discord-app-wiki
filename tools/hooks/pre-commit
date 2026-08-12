@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Pre-commit hook: esegue wiki-lint sui file markdown del vault in staging.
+# Blocca il commit in presenza di ERROR (link rotti, frontmatter mancante,
+# cross-vault, placeholder). I WARNING (stub, orfani, datate) non bloccano.
+#
+# Abilitato da /wiki-init con:  git config core.hooksPath tools/hooks
+# Bypass di emergenza (sconsigliato):  git commit --no-verify
+set -u
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LINT="$REPO_ROOT/tools/lint-wiki.py"
+[ -f "$LINT" ] || { echo "wiki-lint: $LINT non trovato, salto." >&2; exit 0; }
+
+STAGED=$(git diff --cached --name-only --diff-filter=AM | grep -E '^Wiki/.*\.md$' | grep -v '^Wiki/meta/' || true)
+[ -z "$STAGED" ] && exit 0
+
+echo "wiki-lint: controllo dei file wiki in staging..." >&2
+WIKI_DIR=Wiki PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python "$LINT" --paths $STAGED
+RC=$?
+
+if [ "$RC" -ne 0 ]; then
+    echo "" >&2
+    echo "wiki-lint: commit bloccato. Risolvi gli ERROR sopra." >&2
+    echo "Bypass di emergenza: git commit --no-verify" >&2
+    exit 1
+fi
+exit 0

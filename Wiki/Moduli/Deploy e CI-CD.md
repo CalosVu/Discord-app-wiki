@@ -1,0 +1,78 @@
+---
+tipo: modulo
+titolo: Deploy e CI-CD
+alias: [deploy, GitHub Actions, systemd, Hetzner]
+tag: [dominio/infrastruttura]
+fonti: [Codice Discord-access-app, Guida di deployment, Runbook cambio dominio, Guida SSL e DNS]
+creato: 2026-07-25
+aggiornato: 2026-07-25
+stato: stabile
+---
+
+# Deploy e CI-CD
+
+Da `git push` alla produzione, senza passaggi manuali.
+
+## ⚠️ Push su `main` = deploy in produzione
+
+Il workflow GitHub Actions si attiva sui branch **`main` e `master`** (più esecuzione manuale). Ogni
+push su `main` è un **rilascio in produzione**: non esiste ambiente di staging.
+
+Prima di ogni merge su `main` conviene annotare lo **SHA dell'ultimo commit funzionante**, per poter
+tornare indietro con `git revert` in caso di problemi.
+
+## I quattro passi del workflow
+
+1. checkout del codice;
+2. JDK 21 (Temurin) con cache Maven;
+3. `mvn clean package -DskipTests` — ⚠️ **i test non vengono eseguiti** nella pipeline: il verde di
+   `mvn test` va verificato in locale;
+4. `scp` del JAR sul server e, via `ssh`, rinomina in `app.jar` + `systemctl restart discord-bot`.
+
+Segreti necessari nel repository: `SERVER_HOST` e `SERVER_SSH_KEY` (chiave privata dedicata,
+generata sul server per l'utente `deploy`).
+
+## L'ambiente di produzione
+
+| Elemento | Valore |
+|---|---|
+| Provider | Hetzner Cloud, Ubuntu 22.04, 2 vCPU / 4 GB / 40 GB |
+| Utente di esecuzione | `deploy` (non root) |
+| JAR e configurazione | `/home/deploy/discord-bot/deployment/` |
+| Log applicativi e backup | `/opt/discord-bot/logs/` |
+| Servizio | systemd `discord-bot` |
+| Database | MySQL in Docker (`docker-compose.mysql-only.yml`), porta 3306 |
+| Reverse proxy | nginx sui sottodomini, certificati Let's Encrypt |
+| Porta applicativa | 8080, in ascolto su `127.0.0.1` |
+
+L'unit systemd: `EnvironmentFile` che carica il `.env`, `SPRING_PROFILES_ACTIVE=prod`,
+`-Xms512m -Xmx2g`, `Restart=always` con `RestartSec=10`, `NoNewPrivileges`, `PrivateTmp`, log
+rediretti su file.
+
+Il dominio è **`vutradingfarm.it`** dal 2026-07-24 (prima `inwestors.it`): l'app risponde su
+`discord.<dominio>`, VuTracker su `vutracker.<dominio>` ([[Runbook cambio dominio]]).
+
+## Cosa il deploy NON fa
+
+- **non applica migrazioni al database** — ma dal 2026-07-25 non serve: le applica **Flyway** al
+  riavvio dell'applicazione, dalle migration versionate nel repo. `ddl-auto` resta `validate`, quindi
+  se una migration manca il boot fallisce con un messaggio chiaro ([[Schema del database]]);
+- **non aggiorna il `.env`**: va caricato via scp/WinSCP e l'app **riavviata**, perché l'ambiente si
+  legge solo all'avvio;
+- **non esegue i test**;
+- **non tocca nginx né i certificati**.
+
+## Comandi essenziali sul server
+
+```bash
+sudo systemctl status discord-bot        # stato
+sudo systemctl restart discord-bot       # riavvio (serve dopo ogni modifica al .env)
+sudo journalctl -u discord-bot -f        # log in tempo reale
+tail -f /opt/discord-bot/logs/discord-bot.log
+```
+
+## Voci correlate
+- [[Ambienti e profili Spring]]
+- [[Variabili d'ambiente]]
+- [[Schema del database]]
+- [[Backup del database]]

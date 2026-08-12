@@ -1,0 +1,33 @@
+# ============================================================================
+#  .paths — percorsi LOCALI verso le risorse di questo PC  (TEMPLATE)
+# ============================================================================
+# Questo file è il MODELLO condiviso via git. NON contiene percorsi reali né segreti.
+#
+# SETUP (ogni utente, una volta sola, dopo il checkout):
+#   1) Copia questo file:   cp .paths.example .paths
+#   2) Apri .paths e inserisci i percorsi ASSOLUTI validi sul TUO computer.
+#   3) Avvia `claude` nella cartella del repo: leggerà .paths e userà i tuoi percorsi.
+#
+# Il file .paths reale è in .gitignore: resta sul tuo PC e non viene mai committato.
+#
+# REGOLE:
+#   - Formato:  CHIAVE="valore"  (una per riga, sintassi sh, sourceable in bash).
+#   - Niente spazi attorno a "=".  Racchiudi i percorsi tra virgolette doppie.
+#   - Usa percorsi ASSOLUTI.  Su Windows/Git-Bash usa la forma /c/... oppure C:/...
+#   - Le risorse INTERNE al repo (wiki, assets) NON vanno qui: percorsi relativi alla radice.
+#   - Nei file condivisi (CLAUDE.md, .claude/memory/) i percorsi-macchina si scrivono come
+#     ${NOME_VARIABILE} e si risolvono leggendo questo file.
+#   - I SEGRETI (password, token, chiavi) NON vanno qui in chiaro se il progetto è condiviso:
+#     usali via secret manager / .env locale; qui al più il PERCORSO al file dei segreti.
+# ============================================================================
+
+# Codice sorgente dell'applicazione documentata (repo Discord-access-app).
+# È la fonte di rango più alto della wiki: si legge, non si modifica.
+DISCORD_APP_SRC="/percorso/al/repo/Discord-access-app"
+
+# Cartella documentazione e materiale di progetto (documenti .md, dump DB, media).
+DISCORD_APP_DOCS="/percorso/alla/cartella/Discord-app"
+
+# --- Aggiungi qui altre risorse locali man mano che servono ---
+# ESEMPIO:
+# NOME_RISORSA="/c/percorso/alla/risorsa"

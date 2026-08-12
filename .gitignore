@@ -1,0 +1,25 @@
+# === Percorsi e configurazione per-utente (NON condivisi) ===
+# Ogni utente compila il proprio .paths copiandolo da .paths.example
+.paths
+.env
+
+# === Segreti — MAI committare valori in chiaro ===
+*.secret
+secrets/
+*.pem
+*.key
+
+# === Override locali di Claude Code (per-macchina). settings.json È condiviso; .local NO. ===
+.claude/settings.local.json
+
+# === Stato UI personale di Obsidian (per-utente) ===
+Wiki/.obsidian/workspace.json
+Wiki/.obsidian/workspace-mobile.json
+
+# === Lavorazione temporanea ===
+.tmp/
+
+# === Spazzatura di sistema ===
+.DS_Store
+Thumbs.db
+desktop.ini
