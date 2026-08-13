@@ -12,7 +12,7 @@ stato: stabile
 # Prelievo
 
 Un'uscita di denaro registrata da un admin: serve a tenere il **saldo** allineato a quanto è
-realmente rimasto sui conti. Tabella `track_prelievi`, entità `TrackPrelievi`.
+realmente rimasto sui conti. Tabella `pagamenti_prelievi`, entità `TrackPrelievi`.
 
 ## Chi lo registra e come
 

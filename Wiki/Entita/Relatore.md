@@ -11,7 +11,7 @@ stato: stabile
 
 # Relatore
 
-Chi pubblica e vende [[Masterclass]] sul server. Tabella `relatori`, entità `Relatore`.
+Chi pubblica e vende [[Masterclass]] sul server. Tabella `masterclass_relatori`, entità `Relatore`.
 
 ## Come si diventa relatore
 

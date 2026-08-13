@@ -1,15 +1,15 @@
 ---
 tipo: tassonomia
-titolo: Tabella server_config
-alias: [server_config, configurazioni runtime, parametri]
+titolo: Tabella cfg_server
+alias: [cfg_server, server_config, configurazioni runtime, parametri]
 tag: [dominio/configurazione]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-12
+aggiornato: 2026-08-13
 stato: stabile
 ---
 
-# Tabella server_config
+# Tabella cfg_server
 
 L'elenco **completo** dei parametri di configurazione runtime: quelli modificabili dal database
 senza deploy né riavvio. Per il funzionamento del meccanismo vedi [[Configurazione di server]].

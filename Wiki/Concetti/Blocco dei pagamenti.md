@@ -11,7 +11,7 @@ stato: stabile
 
 # Blocco dei pagamenti
 
-Tre interruttori in [[Tabella server_config]] che permettono di **sospendere a runtime** un tipo di
+Tre interruttori in [[Tabella cfg_server]] che permettono di **sospendere a runtime** un tipo di
 incasso, senza deploy e senza riavvio.
 
 ## I tre flag
@@ -59,6 +59,6 @@ Effetto **immediato** (nessuna cache, vedi [[Configurazione di server]]). Per ri
 ⚠️ Non cancellare la riga per bloccare: senza riga vale il default `true`.
 
 ## Voci correlate
-- [[Tabella server_config]]
+- [[Tabella cfg_server]]
 - [[Pagamenti Stripe]]
 - [[Pagamenti crypto Arbitrum]]

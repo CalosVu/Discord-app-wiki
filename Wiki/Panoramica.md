@@ -42,7 +42,7 @@ Il sistema serve quattro tipi di interlocutore, ognuno con i propri comandi in D
 | **Relatore** | consulta le vendite delle proprie masterclass | [[Comandi relatori]] |
 
 Il riconoscimento della platea non è uniforme: l'admin è chi ha il **ruolo Discord** admin sulla
-guild, mentre agente e relatore sono chi risulta censito nelle tabelle `agenti` e `relatori`
+guild, mentre agente e relatore sono chi risulta censito nelle tabelle `referral_agenti` e `masterclass_relatori`
 (fonte: codice `DiscordService.isAdmin`, `AgentiService.findByDiscordId`,
 `RelatoreRepository.findByDiscordId`).
 
@@ -61,7 +61,7 @@ Vedi [[index]] per il catalogo completo. Le categorie principali:
 - **Entita/** — gli oggetti del dominio e le tabelle che li rappresentano ([[Entita]]).
 - **Concetti/** — i meccanismi trasversali: ruoli, promo, commissioni, idempotenza ([[Concetti]]).
 - **Moduli/** — i flussi e le aree funzionali: bot, pagamenti, batch, deploy ([[Moduli]]).
-- **Tassonomie/** — gli elenchi codificati: [[Tabella server_config]], [[Enum di dominio]],
+- **Tassonomie/** — gli elenchi codificati: [[Tabella cfg_server]], [[Enum di dominio]],
   [[Endpoint REST]], [[Schema del database]] ([[Tassonomie]]).
 - **Config-Credenziali/** — riferimenti a configurazioni e segreti, mai i valori
   ([[Config-Credenziali]]).

@@ -77,7 +77,7 @@ su R2) e poi il link di checkout. Vedi [[Sistema masterclass]].
   (fisso nel codice).
 - Chi non ha accettato il disclaimer riceve un embed che rimanda al canale `#disclaimer`, non un
   errore generico.
-- Chi non è censito in `users` provoca un `RuntimeException("Utente non censito!")`: succede a chi
+- Chi non è censito in `utenti` provoca un `RuntimeException("Utente non censito!")`: succede a chi
   interagisce senza aver mai reagito al disclaimer.
 
 ## Voci correlate

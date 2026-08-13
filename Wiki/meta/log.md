@@ -112,5 +112,5 @@ Stripe sarebbe fallito. Aggiunta la migration `V6__tx_hash_lunghezza.sql`, colla
 Trovato anche che i backup automatici erano NON ripristinabili: `DatabaseBackupService` univa lo
 stderr di mysqldump allo stdout, inserendo warning ed errori dentro il file .sql. Corretto
 (stderr su file .log separato, rimosso `--compress` deprecato e inutile su server locale).
-Aggiornata [[Tabella server_config]]: in produzione sono 14 configurazioni, non 9, di cui cinque
+Aggiornata [[Tabella cfg_server]]: in produzione sono 14 configurazioni, non 9, di cui cinque
 non lette da alcun codice. Documentata la tabella `user_account`, priva di entita' corrispondente.

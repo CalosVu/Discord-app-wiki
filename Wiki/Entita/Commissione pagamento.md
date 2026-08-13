@@ -12,7 +12,7 @@ stato: stabile
 # Commissione pagamento
 
 La riga che lega un [[Pagamento]] all'[[Agente]] che lo ha procurato. Tabella
-`commissioni_pagamento`, entità `CommissionePagamento`.
+`referral_commissioni`, entità `CommissionePagamento`.
 
 ## Quando viene creata
 
@@ -22,7 +22,7 @@ condizioni sono vere:
 
 1. il pagamento è associato a un [[Utente]];
 2. l'utente ha un `referral` valorizzato ([[Referral agent]]);
-3. il creatore di quell'invito esiste nella tabella `agenti`;
+3. il creatore di quell'invito esiste nella tabella `referral_agenti`;
 4. se l'agente ha `codici_ref_validi` valorizzato, il codice dell'utente è **in quella lista**;
 5. non esiste già una commissione per lo stesso `payment_id`.
 

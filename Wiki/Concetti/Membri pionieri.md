@@ -33,7 +33,7 @@ prima ondata.
 
 ## Il parametro `PIONIERI` non è usato
 
-In [[Tabella server_config]] esiste la riga `PIONIERI = 50`, descritta come «numero utenti da
+In [[Tabella cfg_server]] esiste la riga `PIONIERI = 50`, descritta come «numero utenti da
 considerare come pionieri oltre 4 di staff». **Nessuna riga di codice la legge**: non esiste alcun
 meccanismo che promuova automaticamente i primi N iscritti. È un residuo di un'idea non
 implementata.

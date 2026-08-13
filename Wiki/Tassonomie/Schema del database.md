@@ -5,7 +5,7 @@ alias: [database, tabelle, DDL, migrazioni]
 tag: [dominio/database]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-12
+aggiornato: 2026-08-13
 stato: stabile
 ---
 
@@ -17,45 +17,65 @@ rompere la produzione.
 Database: `discord_db`. Schema e dati sono versionati con **Flyway** in
 `discord-access-persistence/src/main/resources/db/migration/`.
 
-## Le tredici tabelle
+## Le diciotto tabelle
 
-| Tabella | Entità | Pagina |
-|---|---|---|
-| `users` | `User` | [[Utente]] |
-| `utenti_lifetime` | `UtentiLifetime` | [[Utente lifetime]] |
-| `disclaimer_accept` | `DisclaimerAccept` | [[Accettazione disclaimer]] |
-| `catalogo_servizi` | `CatalogoServizi` | [[Catalogo servizi]] |
-| `referral_agent` | `ReferralAgent` | [[Referral agent]] |
-| `agenti` | `Agente` | [[Agente]] |
-| `commissioni_pagamento` | `CommissionePagamento` | [[Commissione pagamento]] |
-| `payments` | `Payments` | [[Pagamento]] |
-| `track_prelievi` | `TrackPrelievi` | [[Prelievo]] |
-| `user_verify_transaction` | `UserVerifyTransaction` | [[Tentativo di verifica transazione]] |
-| `server_config` | `ServerConfig` | [[Configurazione di server]] |
-| `relatori` | `Relatore` | [[Relatore]] |
-| `masterclass` | `Masterclass` | [[Masterclass]] |
-| `pagamenti_masterclass` | `PagamentoMasterclass` | [[Pagamento masterclass]] |
-| `referral_pendenti` | `ReferralPendente` | [[Referral pendente]] |
-| `snapshot_bilancio` | `SnapshotBilancio` | [[Snapshot bilancio]] (non alimentata) |
-| `log_service` | `LogService` | tabella di log, senza pagina dedicata |
-| `flyway_schema_history` | — | storico delle migration, gestita da Flyway |
+Dal 2026-08-13 il nome è `<dominio>_<cosa>`, in italiano: le tabelle di uno stesso ambito stanno
+vicine in ordine alfabetico, e non convivono più due lingue (`users` accanto a `utenti_lifetime`,
+`payments` accanto a `pagamenti_masterclass`). Il rename è la migration `V11`.
+
+| Tabella | Nome precedente | Entità | Pagina |
+|---|---|---|---|
+| `cfg_server` | `server_config` | `ServerConfig` | [[Configurazione di server]] |
+| `cfg_testi` | `text_config` | `TextConfig` | [[Tabella cfg_server]] |
+| `cfg_catalogo_servizi` | `catalogo_servizi` | `CatalogoServizi` | [[Catalogo servizi]] |
+| `utenti` | `users` | `User` | [[Utente]] |
+| `utenti_lifetime` | — | `UtentiLifetime` | [[Utente lifetime]] |
+| `utenti_disclaimer` | `disclaimer_accept` | `DisclaimerAccept` | [[Accettazione disclaimer]] |
+| `pagamenti` | `payments` | `Payments` | [[Pagamento]] |
+| `pagamenti_prelievi` | `track_prelievi` | `TrackPrelievi` | [[Prelievo]] |
+| `pagamenti_utenti_verifiche` | `user_verify_transaction` | `UserVerifyTransaction` | [[Tentativo di verifica transazione]] |
+| `referral_utenti` | `referral_agent` | `ReferralAgent` | [[Referral agent]] |
+| `referral_agenti` | `agenti` | `Agente` | [[Agente]] |
+| `referral_commissioni` | `commissioni_pagamento` | `CommissionePagamento` | [[Commissione pagamento]] |
+| `referral_pendenti` | — | `ReferralPendente` | [[Referral pendente]] |
+| `masterclass` | — | `Masterclass` | [[Masterclass]] |
+| `masterclass_relatori` | `relatori` | `Relatore` | [[Relatore]] |
+| `masterclass_pagamenti` | `pagamenti_masterclass` | `PagamentoMasterclass` | [[Pagamento masterclass]] |
+| `sys_log_server` | `log_service` | `LogServer` | [[Log operativo]] |
+| `affiliazioni_exchange` | `user_account` | — (non mappata) | vedi in fondo |
+| `flyway_schema_history` | — | — | storico delle migration, gestita da Flyway |
+
+`flyway_schema_history` non è stata rinominata di proposito: Flyway la cerca per nome, e cambiarlo
+richiederebbe di riconfigurarlo senza alcun guadagno.
+
+⚠️ **I nomi di vincoli e indici sono rimasti quelli vecchi**: dopo il rename una chiave esterna si
+chiama ancora `referral_pendenti_ibfk_1`. Non compaiono nell'uso quotidiano e rinominarli avrebbe
+richiesto di ricrearli uno per uno.
+
+> [!warning] Eliminata: `snapshot_bilancio`
+> Rimossa da `V11` insieme a entità, repository e batch. Non è mai stata scritta: la classe
+> `SnapshotBilancioBatch` era un guscio vuoto con `@Scheduled`, query e repository interamente
+> commentati. Zero righe in produzione. Vedi [[Snapshot bilancio]].
 
 ## Le relazioni portanti
 
 ```
-referral_agent ──┬──< users >──── catalogo_servizi   (piano_applicato_id)
+referral_utenti ─┬──< utenti >──── cfg_catalogo_servizi   (piano_applicato_id)
                  │       │  │
-                 │       │  └──── disclaimer_accept  (1-a-1)
-                 │       │  └──── payments           (ultimo pagamento, 1-a-1)
-                 │       ├──< agenti      ──< commissioni_pagamento >── payments
-                 │       ├──< relatori    ──< masterclass ──< pagamenti_masterclass
-                 │       └──< user_verify_transaction
-                 └──< catalogo_servizi    (promo per referral)
+                 │       │  └──── utenti_disclaimer       (1-a-1)
+                 │       │  └──── pagamenti               (ultimo pagamento, 1-a-1)
+                 │       ├──< referral_agenti ──< referral_commissioni >── pagamenti
+                 │       ├──< masterclass_relatori ──< masterclass ──< masterclass_pagamenti
+                 │       └──< pagamenti_utenti_verifiche
+                 └──< cfg_catalogo_servizi    (promo per referral)
 ```
 
-Particolarità: `payments` ha **due** FK verso `users` — su `user_id` e su `discord_id`.
-`log_service` ha una FK verso `disclaimer_accept.discord_id`, non verso `users`.
-`referral_pendenti` ha una FK verso `users.discord_id` con vincolo di unicità: una riga per utente.
+Particolarità: `pagamenti` ha **due** FK verso `utenti` — su `user_id` e su `discord_id`.
+`referral_pendenti` ha una FK verso `utenti.discord_id` con vincolo di unicità: una riga per utente.
+
+`sys_log_server` **non ha chiavi esterne**, di proposito: un log deve restare leggibile anche se
+l'utente viene cancellato. La vecchia `log_service` puntava a `disclaimer_accept`, il che rendeva
+registrabile un evento solo per chi aveva accettato il disclaimer ([[Log operativo]]).
 
 ## Le migration applicate
 
@@ -64,13 +84,24 @@ Particolarità: `payments` ha **due** FK verso `users` — su `user_id` e su `di
 | `V1__baseline_schema.sql` | schema di base (ex `sql/create_table.sql`) |
 | `V2__dati_iniziali.sql` | dati di bootstrap (ex `sql/insert.sql`) |
 | `V3__referral_utilizzi_e_pendenti.sql` | colonna `referral_agent.utilizzi` + tabella `referral_pendenti` |
-| `V4__text_config.sql` | tabella `text_config` + `UNIQUE` su `server_config.nome_configurazione` |
+| `V4__text_config.sql` | tabella `cfg_testi` + `UNIQUE` su `server_config.nome_configurazione` |
 | `V5__testi_istanza.sql` | disclaimer e testi con riferimenti espliciti |
 | `V6__tx_hash_lunghezza.sql` | `payments.tx_hash` da `varchar(66)` a `varchar(128)` |
-| `V7__flag_batch_abbonamenti.sql` | chiave `BATCH_ABBONAMENTI_ABILITATO` in `server_config` |
+| `V7__flag_batch_abbonamenti.sql` | chiave `BATCH_ABBONAMENTI_ABILITATO` in `cfg_server` |
 | `V8__account_stripe_neutri_e_backup.sql` | `stripe_account` da `LILLO`/`DANNY` a `PRIMARIO`/`SECONDARIO`; rinomina la chiave di V7 in `BATCH_VERIFICA_ABBONAMENTI`; aggiunge `BACKUP_DB_ABILITATO` e le cinque `RUOLO_*` |
 | `V9__pulizia_config_inutilizzate.sql` | elimina `PERCENTUALE_COMMISSIONI_STRIPE` e `QUOTA_FISSA_COMM_STRIPE`, che nessun codice legge |
 | `V10__percentuale_stripe_secondario.sql` | aggiunge `PERCENTUALE_STRIPE_SECONDARIO` ([[Bilanciamento degli account Stripe]]) |
+| `V11__rinomina_tabelle_e_log.sql` | rinomina le tabelle per dominio, elimina `snapshot_bilancio`, sostituisce `log_service` con `sys_log_server` |
+
+### Rinominare tabelle senza rompere le chiavi esterne
+
+`V11` usa **un solo** `RENAME TABLE` con tutte le tabelle elencate: MySQL lo esegue in modo atomico
+e aggiorna da sé le chiavi esterne che puntano alle tabelle rinominate. Farne uno per tabella
+avrebbe lasciato lo schema in stati intermedi incoerenti se una fosse fallita.
+
+Il rename è stato praticabile perché nel progetto **non esiste una sola query nativa**: tutte le
+interrogazioni sono JPQL, che usa i nomi delle *entità*, non delle tabelle. L'unico punto da
+aggiornare erano le annotazioni `@Table`.
 
 ### Come si cambiano i valori di un `ENUM` senza perdere i dati
 
@@ -104,7 +135,7 @@ constraint 'referral_pendenti_ibfk_1' are incompatible.
 ```
 
 MySQL rifiuta una chiave esterna fra due `varchar(64)` con collation diverse. La tabella
-`referral_pendenti` nasceva `utf8mb4_0900_ai_ci` per default, `users` era `utf8mb4_unicode_ci`.
+`referral_pendenti` nasceva `utf8mb4_0900_ai_ci` per default, `utenti` era `utf8mb4_unicode_ci`.
 
 **Regola:** ogni migration che crea una tabella con una chiave esterna verso una colonna testuale
 dichiara `COLLATE utf8mb4_unicode_ci` sulla colonna e `DEFAULT CHARSET=utf8mb4
@@ -139,7 +170,7 @@ allinea le due situazioni.
 
 ## Tabelle non mappate
 
-`user_account` (24 righe in produzione) **non corrisponde ad alcuna entità JPA** e nessuna riga di
+`affiliazioni_exchange` (24 righe in produzione) **non corrisponde ad alcuna entità JPA** e nessuna riga di
 codice la nomina — ma **non è un residuo**: è un registro di gestione interna, compilato a mano.
 
 Raccoglie gli utenti che hanno aperto un account sugli **exchange con cui esiste un'affiliazione**,

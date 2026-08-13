@@ -31,8 +31,8 @@ utente paga
 ```
 
 Il punto chiave: **creare inviti non basta**. La commissione matura solo se il creatore dell'invito
-è anche censito nella tabella `agenti`, e la percentuale usata è quella di `agenti`, non quella
-(sempre 0) di `referral_agent`.
+è anche censito nella tabella `referral_agenti`, e la percentuale usata è quella di `referral_agenti`, non quella
+(sempre 0) di `referral_utenti`.
 
 ## Come si individua l'invito usato
 

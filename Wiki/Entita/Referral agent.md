@@ -12,7 +12,7 @@ stato: stabile
 # Referral agent
 
 Un **codice invito Discord** con l'indicazione di chi l'ha creato. È l'anello che collega un
-[[Utente]] a chi lo ha portato, e quindi la base delle commissioni. Tabella `referral_agent`.
+[[Utente]] a chi lo ha portato, e quindi la base delle commissioni. Tabella `referral_utenti`.
 
 Nonostante il nome, **non** rappresenta un agente: l'agente è un'entità diversa ([[Agente]]). Qui
 finisce **ogni** invito della guild, creato da chiunque.
@@ -61,7 +61,7 @@ applica davvero sta su **`agenti.commissione_percentuale`** ([[Agente]]). Il col
 Utente.referral → referral_agent.id_discord_agente → agenti.discord_id → percentuale
 ```
 
-Chi ha creato l'invito diventa quindi remunerato **solo se** risulta anche nella tabella `agenti`.
+Chi ha creato l'invito diventa quindi remunerato **solo se** risulta anche nella tabella `referral_agenti`.
 Vedi [[Sistema referral e commissioni]].
 
 ## Un agente, molti codici

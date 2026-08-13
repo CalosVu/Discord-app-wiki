@@ -12,7 +12,7 @@ stato: stabile
 # Tentativo di verifica transazione
 
 Il registro di **ogni** tentativo di verifica di una transazione crypto, riuscito o fallito.
-Tabella `user_verify_transaction`, entità `UserVerifyTransaction`.
+Tabella `pagamenti_utenti_verifiche`, entità `UserVerifyTransaction`.
 
 ## A cosa serve
 
@@ -40,7 +40,7 @@ Prima di ogni verifica il sistema conta i tentativi dell'utente nella finestra r
 tentativi negli ultimi TEMPO_LIMITE_VERIFICA ore  >=  N_TENTATIVI_VERIFICA   →   rifiuto
 ```
 
-Entrambi i parametri vengono da [[Tabella server_config]] (oggi: 3 tentativi in 2 ore, default nel
+Entrambi i parametri vengono da [[Tabella cfg_server]] (oggi: 3 tentativi in 2 ore, default nel
 codice 3 e 2). Al superamento l'utente riceve: «Raggiunto limite massimo di 3 tentativi errati nelle
 ultime 2h».
 
@@ -55,5 +55,5 @@ reali sono configurabili: se si cambia la configurazione, il messaggio non segue
 
 ## Voci correlate
 - [[Pagamenti crypto Arbitrum]]
-- [[Tabella server_config]]
+- [[Tabella cfg_server]]
 - [[Configurazione di server]]

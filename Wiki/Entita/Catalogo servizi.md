@@ -12,7 +12,7 @@ stato: stabile
 # Catalogo servizi
 
 Il listino: definisce **prezzo, durata e ruolo** di ogni piano di abbonamento, e ospita anche le
-[[Promozioni temporali]]. Tabella `catalogo_servizi`, entità `CatalogoServizi`.
+[[Promozioni temporali]]. Tabella `cfg_catalogo_servizi`, entità `CatalogoServizi`.
 
 ## Le tre righe che esistono
 

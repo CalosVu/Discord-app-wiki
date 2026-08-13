@@ -12,7 +12,7 @@ stato: stabile
 # Utente
 
 L'utente Discord censito nel sistema: è l'entità attorno a cui ruotano abbonamento, ruoli, referral
-e pagamenti. Tabella `users`, entità `discord.access.app.entity.User`.
+e pagamenti. Tabella `utenti`, entità `discord.access.app.entity.User`.
 
 ## Quando nasce
 
@@ -32,7 +32,7 @@ come rete di sicurezza per chi era già membro del server prima di questo flusso
 
 > [!warning] Storia / claim superate
 > Fino al 2026-07-26 l'utente veniva creato **solo** all'accettazione del disclaimer: fra ingresso e
-> reazione ✅ non esisteva alcuna riga in `users`, e chi non accettava mai non esisteva per
+> reazione ✅ non esisteva alcuna riga in `utenti`, e chi non accettava mai non esisteva per
 > l'applicazione. Il referral dedotto all'ingresso viveva in memoria in attesa di quel momento, e un
 > riavvio nel frattempo lo perdeva. **Ora vale il censimento all'ingresso.**
 

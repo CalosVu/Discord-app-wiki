@@ -12,7 +12,7 @@ stato: stabile
 # Pagamento
 
 Un incasso verso il server: abbonamento [[Abbonamento Supporter Member]] o [[Sostegno libero]],
-pagato in crypto o con carta. Tabella `payments`, entità `discord.access.app.entity.Payments`.
+pagato in crypto o con carta. Tabella `pagamenti`, entità `discord.access.app.entity.Payments`.
 
 Non include gli acquisti di masterclass, che vivono su una tabella separata
 ([[Pagamento masterclass]]).

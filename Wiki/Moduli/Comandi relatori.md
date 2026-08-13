@@ -11,7 +11,7 @@ stato: stabile
 
 # Comandi relatori
 
-Un solo comando, `!miemasterclass`, riservato a chi è censito nella tabella `relatori`
+Un solo comando, `!miemasterclass`, riservato a chi è censito nella tabella `masterclass_relatori`
 ([[Relatore]]).
 
 ## Chi può usarlo

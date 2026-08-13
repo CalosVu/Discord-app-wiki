@@ -16,7 +16,7 @@ Sono le pagine da consultare quando serve **il valore esatto** di qualcosa.
 
 ## Contenuto
 
-- [[Tabella server_config]] — tutti i parametri di configurazione runtime, con valore attuale,
+- [[Tabella cfg_server]] — tutti i parametri di configurazione runtime, con valore attuale,
   default nel codice e chi li legge.
 - [[Enum di dominio]] — i cinque enum Java, con l'indicazione di quali valori sono realmente usati.
 - [[Endpoint REST]] — la superficie HTTP completa, con la protezione di ciascun percorso.
@@ -25,7 +25,7 @@ Sono le pagine da consultare quando serve **il valore esatto** di qualcosa.
 ## Perché sono separate dai Concetti
 
 Un [[Concetti|concetto]] spiega *come funziona* un meccanismo; una tassonomia elenca *i valori*.
-Il [[Blocco dei pagamenti]] spiega la logica dei tre flag; [[Tabella server_config]] dice come si
+Il [[Blocco dei pagamenti]] spiega la logica dei tre flag; [[Tabella cfg_server]] dice come si
 chiamano e quanto valgono adesso.
 
 ## Voci correlate

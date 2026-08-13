@@ -99,7 +99,7 @@ il deploy del doppio account anche **prima** di inserire le chiavi.
 
 ⚠️ Prima di valorizzare le chiavi del secondario va **registrato il suo webhook su Stripe**. Se si
 attivano le chiavi senza registrare l'endpoint, il cliente paga ma la notifica non arriva mai:
-nessuna riga in `payments`, nessun ruolo assegnato ([[Idempotenza dei webhook]]).
+nessuna riga in `pagamenti`, nessun ruolo assegnato ([[Idempotenza dei webhook]]).
 
 ## Isolamento delle chiavi
 
@@ -141,5 +141,5 @@ invece di mostrare uno 0% fuorviante. Vedi [[Reportistica]].
 - [[Pagamenti Stripe]]
 - [[Prelievo]]
 - [[Chiavi Stripe]]
-- [[Tabella server_config]]
+- [[Tabella cfg_server]]
 - [[Piano sviluppo doppio Stripe]]

@@ -71,7 +71,7 @@ Punto di partenza consigliato: [[Panoramica]].
 ## Tassonomie
 
 - [[Tassonomie]] — hub degli elenchi codificati.
-- [[Tabella server_config]] — i nove parametri runtime, con valori e chi li legge.
+- [[Tabella cfg_server]] — i nove parametri runtime, con valori e chi li legge.
 - [[Enum di dominio]] — i valori ammessi e quali sono realmente usati.
 - [[Endpoint REST]] — la superficie HTTP completa e la protezione di ciascun percorso.
 - [[Schema del database]] — le tabelle, le relazioni e le regole di migrazione.

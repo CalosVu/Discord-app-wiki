@@ -39,7 +39,7 @@ Quando una query richiede contenuti non ingeriti:
 📁 `${DISCORD_APP_DOCS}/Backup_db/dump-discord_db-202508121959.sql`
 - **Schema e dati reali (agosto 2025)** — utile per validare lo [[Schema del database]] documentato
   contro quello realmente in produzione, e per conoscere volumi/valori reali di
-  [[Tabella server_config]], `catalogo_servizi`, `agenti`, `relatori`. Non ingerito: contiene dati
+  [[Tabella cfg_server]], `catalogo_servizi`, `agenti`, `relatori`. Non ingerito: contiene dati
   personali degli utenti. Quando rileggere: verifica di uno scostamento schema, o domanda su dati
   storici reali.
 

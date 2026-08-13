@@ -11,8 +11,8 @@ stato: stabile
 
 # Pagamento masterclass
 
-L'acquisto di una [[Masterclass]] da parte di un [[Utente]]. Tabella `pagamenti_masterclass`,
-tenuta **separata** da `payments` perché i campi non sono pertinenti (nessun wallet, nessun ruolo da
+L'acquisto di una [[Masterclass]] da parte di un [[Utente]]. Tabella `masterclass_pagamenti`,
+tenuta **separata** da `pagamenti` perché i campi non sono pertinenti (nessun wallet, nessun ruolo da
 assegnare).
 
 ## Campi

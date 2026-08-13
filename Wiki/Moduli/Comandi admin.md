@@ -96,7 +96,7 @@ agente → periodo (mese corrente o precedente) → due embed, Stripe in EUR e c
 
 Non esistono comandi per: creare o modificare [[Agente|agenti]], [[Relatore|relatori]],
 [[Masterclass]], [[Utente lifetime]], voci del [[Catalogo servizi]] o parametri di
-[[Tabella server_config]]. Tutte queste operazioni si fanno **a mano via SQL** sul database.
+[[Tabella cfg_server]]. Tutte queste operazioni si fanno **a mano via SQL** sul database.
 
 ## Voci correlate
 - [[Reportistica]]

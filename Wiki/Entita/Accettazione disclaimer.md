@@ -12,13 +12,13 @@ stato: stabile
 # Accettazione disclaimer
 
 Registra chi ha accettato le regole del server reagendo con ✅ al messaggio del disclaimer. Tabella
-`disclaimer_accept`, entità `DisclaimerAccept`.
+`utenti_disclaimer`, entità `DisclaimerAccept`.
 
 ## Struttura
 
 | Campo | Colonna | Note |
 |---|---|---|
-| `discordId` | `discord_id` | `UNIQUE`; usato come FK da `log_service` |
+| `discordId` | `discord_id` | `UNIQUE`; usato come FK da `sys_log_server` |
 | `accettato` | `accettato` | booleano, aggiornato in entrambe le direzioni |
 | `dataAccettazione` | `data_accettazione` | timestamp di default |
 
@@ -50,7 +50,7 @@ quel punto esiste già, perché viene censito all'ingresso nel server
 dell'introduzione del censimento all'ingresso — viene creato in quel momento come rete di sicurezza.
 
 > [!warning] Storia / claim superate
-> Fino al 2026-07-26 era **l'accettazione stessa a creare** la riga in `users`: senza reazione ✅
+> Fino al 2026-07-26 era **l'accettazione stessa a creare** la riga in `utenti`: senza reazione ✅
 > l'utente non esisteva per l'applicazione. **Ora la creazione avviene all'ingresso** e qui resta solo
 > il collegamento e l'abilitazione.
 

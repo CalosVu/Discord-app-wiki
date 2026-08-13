@@ -5,27 +5,49 @@ alias: [snapshot_bilancio, SnapshotBilancio]
 tag: [dominio/pagamenti]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
-stato: stabile
+aggiornato: 2026-08-13
+stato: obsoleto
 ---
 
 # Snapshot bilancio
 
-Fotografia periodica del bilancio (depositi, prelievi, saldo) per metodo di pagamento. Tabella
-`snapshot_bilancio`, entità `SnapshotBilancio`.
+> [!warning] Eliminato il 2026-08-13
+> Tabella, entità, repository e batch **non esistono più**: rimossi dalla migration `V11` e dal
+> commit dello stesso giorno. Questa pagina resta perché il nome ricorre altrove nella wiki e
+> perché la storia spiega una scelta — non descrive nulla di presente nel codice.
 
-## ⚠️ Funzionalità NON attiva
+Doveva essere la fotografia periodica del bilancio (depositi, prelievi, saldo) per metodo di
+pagamento, nella tabella `snapshot_bilancio`.
 
-La tabella esiste, l'entità e il repository sono completi e ricchi di query, ma **nessuna riga viene
-mai scritta**: l'intera classe `SnapshotBilancioBatch` è **commentata riga per riga**. Al suo interno
-resta solo la dichiarazione `@Service` con un corpo vuoto.
+## Perché è stato eliminato
 
-Anche lo `@Scheduled` previsto (`0 0 3 * * MON`, ogni lunedì alle 3:00) è commentato.
+Non è mai stato attivo un solo giorno. L'entità e il repository erano completi e ricchi di query,
+ma **tutte commentate**; la classe `SnapshotBilancioBatch` era un guscio vuoto:
 
-Chiunque cerchi lo storico del bilancio non lo troverà: esiste solo il **calcolo a runtime** dei
-saldi, fatto ogni volta da zero su `payments` e `track_prelievi` ([[Reportistica]]).
+```java
+@Service @Slf4j @RequiredArgsConstructor @Validated
+public class SnapshotBilancioBatch {
+}
+```
 
-## Struttura prevista
+con dodici import inutilizzati e lo `@Scheduled` previsto (`0 0 3 * * MON`, ogni lunedì alle 3:00)
+commentato due volte. In produzione la tabella aveva **zero righe**.
+
+Il danno non era il codice inerte ma la documentazione: `CLAUDE.md` e questa wiki lo elencavano fra
+i **batch schedulati attivi**, accanto a quello degli abbonamenti. Chi leggeva poteva credere che
+esistesse uno storico del bilancio su cui fare affidamento per una riconciliazione.
+
+**Nel progetto esiste un solo `@Scheduled`**: quello delle 22:00 in `VerificaAbbonamentiBatch`
+([[Batch verifica abbonamenti]]).
+
+## Se servisse davvero uno storico
+
+Oggi i saldi sono **ricalcolati a runtime** ogni volta, da zero, su `pagamenti` e
+`pagamenti_prelievi` ([[Reportistica]]). Con i volumi attuali è irrilevante. Uno storico avrebbe
+senso per due ragioni diverse — prestazioni, oppure poter dire *quanto c'era in cassa il 3 marzo* —
+e andrebbe riscritto partendo da quel requisito, non recuperando questo codice.
+
+## Com'era la struttura prevista
 
 | Campo | Note |
 |---|---|
@@ -37,15 +59,18 @@ saldi, fatto ogni volta da zero su `payments` e `track_prelievi` ([[Reportistica
 | `automatico`, `generatoDa`, `noteSnapshot` | provenienza |
 | vincolo `UNIQUE (data_snapshot, metodo_pagamento)` | uno snapshot al giorno per metodo |
 
-## Cosa servirebbe per riattivarla
+## I difetti che il progetto originale aveva già
 
-1. Decommentare la classe e lo `@Scheduled`.
-2. **Estendere l'enum in DDL** a `STRIPE`, altrimenti gli snapshot Stripe non sono rappresentabili.
-3. Decidere se lo snapshot va **per account Stripe** (primario/secondario) come i saldi attuali, oppure
-   aggregato: oggi la colonna non lo prevede ([[Bilanciamento degli account Stripe]]).
-4. Implementare `contaTransazioni` e `contaUtentiAttivi`, che nel codice commentato ritornano `0`.
+Sono il motivo per cui non conviene recuperarlo, ma riscriverlo:
+
+1. l'enum in DDL ammetteva solo `CRYPTO` e `PAYPAL`: **mancava `STRIPE`**, cioè il canale
+   principale non era nemmeno rappresentabile;
+2. non era previsto il dettaglio **per account Stripe** (primario/secondario), che invece i saldi
+   attuali distinguono ([[Bilanciamento degli account Stripe]]);
+3. `contaTransazioni` e `contaUtentiAttivi` ritornavano `0` — statistiche mai implementate.
 
 ## Voci correlate
 - [[Reportistica]]
-- [[Prelievo]]
-- [[Pagamento]]
+- [[Batch verifica abbonamenti]]
+- [[Log operativo]]
+- [[Schema del database]]

@@ -30,7 +30,7 @@ R2 è S3-compatibile: il codice usa l'AWS SDK v2 con `endpointOverride` sull'end
 ## Il link firmato
 
 Generato al volo dopo il pagamento, con durata letta da `MASTERCLASS_DURATA_LINK_ORE`
-([[Tabella server_config]], default 3 ore). Punta all'endpoint S3 API di R2, non al dominio pubblico
+([[Tabella cfg_server]], default 3 ore). Punta all'endpoint S3 API di R2, non al dominio pubblico
 `r2.dev`.
 
 Il limite tecnico di SigV4 è **7 giorni**: le poche ore usate sono ampiamente entro il limite.

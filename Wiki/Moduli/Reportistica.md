@@ -43,7 +43,7 @@ Tutti i filtri sono su `stato_verifica = 'COMPLETED'` per i [[Pagamento|pagament
 ```
 
 La percentuale è la quota di quell'account sul **saldo netto complessivo** dei due conti Stripe;
-l'obiettivo è `PERCENTUALE_STRIPE_SECONDARIO` ([[Tabella server_config]]). Serve a sapere in
+l'obiettivo è `PERCENTUALE_STRIPE_SECONDARIO` ([[Tabella cfg_server]]). Serve a sapere in
 anticipo dove finirà il prossimo pagamento: nell'esempio il secondario è sopra il suo obiettivo,
 quindi toccherà al primario ([[Bilanciamento degli account Stripe]]).
 
@@ -72,7 +72,7 @@ L'inizio è portato a `00:00:00`, la fine a `23:59:59.999999999`.
 
 ## ⚠️ Il saldo è ricalcolato ogni volta
 
-Non esiste uno storico: ogni lettura riscorre l'intero `payments` e `track_prelievi`. Con i volumi
+Non esiste uno storico: ogni lettura riscorre l'intero `pagamenti` e `pagamenti_prelievi`. Con i volumi
 attuali è irrilevante, ma è il motivo per cui esisteva l'idea degli
 [[Snapshot bilancio]] — funzionalità mai attivata.
 

@@ -40,7 +40,7 @@ resto del codice.
 
 ## Aggiungere un relatore
 
-1. inserire la riga in `relatori` e annotare l'`id` generato;
+1. inserire la riga in `masterclass_relatori` e annotare l'`id` generato;
 2. aggiungere al file d'ambiente `STRIPE_MC_SK_<id>` e `STRIPE_MC_WHSEC_<id>`;
 3. nel Dashboard Stripe **di quel relatore**, creare l'endpoint webhook
    `https://discord.<dominio>/api/webhooks/stripe/masterclass/relatore/<id>` con gli eventi

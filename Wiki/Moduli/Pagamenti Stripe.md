@@ -18,7 +18,7 @@ registra l'incasso. Copre sia l'[[Abbonamento Supporter Member]] sia il [[Sosteg
 
 1. Il selettore sceglie l'account su cui incassare
    ([[Bilanciamento degli account Stripe]]).
-2. Si legge la durata di validità da `N_ORE_DURATA_LINK_STRIPE` ([[Tabella server_config]], oggi 5).
+2. Si legge la durata di validità da `N_ORE_DURATA_LINK_STRIPE` ([[Tabella cfg_server]], oggi 5).
 3. Si crea la Checkout Session in modalità `PAYMENT`, `SubmitType.DONATE`,
    `CustomerCreation.ALWAYS`, con `expiresAt` calcolato.
 

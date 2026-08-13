@@ -29,7 +29,7 @@ Il resto del codice usa invece esplicitamente `DateValidator.oreItaliane()`
 
 ## Due interruttori, non uno
 
-Da `V7`/`V8` il batch è governato da due chiavi indipendenti di [[Tabella server_config]]:
+Da `V7`/`V8` il batch è governato da due chiavi indipendenti di [[Tabella cfg_server]]:
 
 | `BACKUP_DB_ABILITATO` | `BATCH_VERIFICA_ABBONAMENTI` | Alle 22:00 |
 |---|---|---|
@@ -95,5 +95,5 @@ Il blocco che avrebbe rimosso il ruolo `GOLD_SUPPORTER_MEMBER` dopo 30 giorni da
 ## Voci correlate
 - [[Abbonamento Supporter Member]]
 - [[Ruoli Discord]]
-- [[Tabella server_config]]
+- [[Tabella cfg_server]]
 - [[Backup del database]]

@@ -20,7 +20,7 @@ pagante.
    `onGuildMemberJoin`:
    - `InviteListener` confronta i contatori d'uso degli inviti per capire **quale invito** è stato
      usato;
-   - `DisclaimerListener` **censisce l'utente** in `users` ([[Utente]]), assegna il ruolo **GUEST** e
+   - `DisclaimerListener` **censisce l'utente** in `utenti` ([[Utente]]), assegna il ruolo **GUEST** e
      invia in DM il messaggio di benvenuto con i pulsanti dei comandi ([[Comandi utente]]).
 2. **L'utente legge il disclaimer** nel canale dedicato e reagisce con ✅.
 3. `DisclaimerListener.onMessageReactionAdd`:
@@ -55,7 +55,7 @@ ma **l'utente non viene degradato**: ruoli e abbonamento restano quelli che eran
   finiscono in [[Referral pendente]] come `AMBIGUO`.
 - Chi non viene attribuito è recuperabile con `!SyncReferral` ([[Comandi admin]]), perché i contatori
   non vengono riallineati sui fallimenti ([[Sistema referral e commissioni]]).
-- Un utente che entra e **non accetta mai** il disclaimer ora **esiste** in `users`, con
+- Un utente che entra e **non accetta mai** il disclaimer ora **esiste** in `utenti`, con
   `abilitato = false`: può ricevere DM e usare `!Comandi`, ma ogni flusso di pagamento resta bloccato
   dal gate del disclaimer. La tabella cresce quindi con tutti i passanti — scelta deliberata, senza
   filtri.

@@ -17,31 +17,31 @@ relazioni, vedi [[Schema del database]].
 
 ## Persone e accessi
 
-- [[Utente]] — l'utente Discord censito, con abbonamento e referral. Tabella `users`.
+- [[Utente]] — l'utente Discord censito, con abbonamento e referral. Tabella `utenti`.
 - [[Utente lifetime]] — accesso permanente, esente da scadenze. Tabella `utenti_lifetime`.
-- [[Accettazione disclaimer]] — chi ha accettato le regole. Tabella `disclaimer_accept`.
-- [[Agente]] — chi porta iscritti e percepisce commissioni. Tabella `agenti`.
-- [[Relatore]] — chi pubblica masterclass. Tabella `relatori`.
+- [[Accettazione disclaimer]] — chi ha accettato le regole. Tabella `utenti_disclaimer`.
+- [[Agente]] — chi porta iscritti e percepisce commissioni. Tabella `referral_agenti`.
+- [[Relatore]] — chi pubblica masterclass. Tabella `masterclass_relatori`.
 
 ## Offerta e prezzi
 
-- [[Catalogo servizi]] — piani BASIC / PIONIERE e promozioni. Tabella `catalogo_servizi`.
+- [[Catalogo servizi]] — piani BASIC / PIONIERE e promozioni. Tabella `cfg_catalogo_servizi`.
 - [[Masterclass]] — il singolo contenuto video in vendita. Tabella `masterclass`.
 
 ## Movimenti di denaro
 
-- [[Pagamento]] — incasso Supporter Member o donazione. Tabella `payments`.
-- [[Pagamento masterclass]] — acquisto di una masterclass. Tabella `pagamenti_masterclass`.
-- [[Commissione pagamento]] — riga di commissione maturata da un agente. Tabella `commissioni_pagamento`.
-- [[Prelievo]] — uscita registrata da un admin. Tabella `track_prelievi`.
+- [[Pagamento]] — incasso Supporter Member o donazione. Tabella `pagamenti`.
+- [[Pagamento masterclass]] — acquisto di una masterclass. Tabella `masterclass_pagamenti`.
+- [[Commissione pagamento]] — riga di commissione maturata da un agente. Tabella `referral_commissioni`.
+- [[Prelievo]] — uscita registrata da un admin. Tabella `pagamenti_prelievi`.
 - [[Snapshot bilancio]] — fotografia periodica del bilancio. Tabella `snapshot_bilancio` (**non alimentata**).
 
 ## Tracciamento
 
-- [[Referral agent]] — il codice invito Discord e chi l'ha creato. Tabella `referral_agent`.
+- [[Referral agent]] — il codice invito Discord e chi l'ha creato. Tabella `referral_utenti`.
 - [[Referral pendente]] — utente in attesa di attribuzione del referral. Tabella `referral_pendenti`.
-- [[Tentativo di verifica transazione]] — ogni tentativo di verifica crypto. Tabella `user_verify_transaction`.
-- [[Configurazione di server]] — parametro runtime chiave/valore. Tabella `server_config`.
+- [[Tentativo di verifica transazione]] — ogni tentativo di verifica crypto. Tabella `pagamenti_utenti_verifiche`.
+- [[Configurazione di server]] — parametro runtime chiave/valore. Tabella `cfg_server`.
 
 ## Voci correlate
 - [[Schema del database]]

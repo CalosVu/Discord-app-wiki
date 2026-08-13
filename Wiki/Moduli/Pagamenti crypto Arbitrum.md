@@ -33,7 +33,7 @@ Entrambi con **6 decimali** (non 18 come ETH): è il moltiplicatore usato nel co
 1. formato dell'hash: `0x` + 64 esadecimali;
 2. numero di mesi fra 1 e 24;
 3. **rate limiting** su [[Tentativo di verifica transazione]];
-4. hash non già presente in `payments` (`tx_hash` è `UNIQUE`).
+4. hash non già presente in `pagamenti` (`tx_hash` è `UNIQUE`).
 
 **Verifica on-chain:**
 

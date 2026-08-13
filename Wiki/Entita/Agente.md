@@ -11,13 +11,13 @@ stato: stabile
 
 # Agente
 
-Un utente **remunerato** sui pagamenti di chi è entrato con i suoi inviti. Tabella `agenti`, entità
+Un utente **remunerato** sui pagamenti di chi è entrato con i suoi inviti. Tabella `referral_agenti`, entità
 `Agente`.
 
 ## Come si diventa agente
 
 **A mano, via SQL.** Non esiste nessun comando del bot per creare o modificare un agente: la riga va
-inserita direttamente in `agenti` (stessa filosofia di [[Relatore]] e [[Utente lifetime]]).
+inserita direttamente in `referral_agenti` (stessa filosofia di [[Relatore]] e [[Utente lifetime]]).
 
 Vincoli: `discord_id` è `UNIQUE` e ha una FK verso `users.discord_id`, quindi l'utente **deve già
 essere censito** ([[Utente]]).

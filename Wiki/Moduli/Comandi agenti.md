@@ -11,7 +11,7 @@ stato: stabile
 
 # Comandi agenti
 
-Un solo comando, `!mieiref`, riservato a chi è censito nella tabella `agenti` ([[Agente]]).
+Un solo comando, `!mieiref`, riservato a chi è censito nella tabella `referral_agenti` ([[Agente]]).
 
 ## Chi può usarlo
 

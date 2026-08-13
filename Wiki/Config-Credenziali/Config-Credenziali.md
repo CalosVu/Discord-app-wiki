@@ -32,9 +32,9 @@ Il sistema ha **due** posti dove si configura il comportamento, con proprietà d
 | Livello | Dove | Serve un riavvio? | Contiene segreti? |
 |---|---|---|---|
 | **Ambiente** | file `.env` sul server, letto all'avvio | **sì** | sì |
-| **Runtime** | tabella `server_config` nel database | **no** | no |
+| **Runtime** | tabella `cfg_server` nel database | **no** | no |
 
-Vedi [[Tabella server_config]] per il secondo livello.
+Vedi [[Tabella cfg_server]] per il secondo livello.
 
 ## Le regole di igiene applicate nel codice
 
@@ -48,6 +48,6 @@ Vedi [[Tabella server_config]] per il secondo livello.
   rimuovere (segnalato in [[Piano sviluppo doppio Stripe]]).
 
 ## Voci correlate
-- [[Tabella server_config]]
+- [[Tabella cfg_server]]
 - [[Deploy e CI-CD]]
 - [[Sicurezza e autenticazione]]

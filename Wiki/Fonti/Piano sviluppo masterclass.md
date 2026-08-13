@@ -30,7 +30,7 @@ fonte che spiega il *perché* delle scelte, ma descrive anche il modello Connect
 | 4 | Accesso **una-tantum**: link solo al pagamento, link perso = intervento admin | [[Sistema masterclass]] |
 | 5 | `relatori` e `masterclass` popolate **a mano via SQL**, nessun comando di gestione | [[Relatore]], [[Masterclass]] |
 | 6 | **Doppio acquisto bloccato** (check `COMPLETED` su `user_id + masterclass_id`) | [[Pagamento masterclass]] |
-| 7 | Durata del link **globale** da `server_config`, default 3h | [[Tabella server_config]] |
+| 7 | Durata del link **globale** da `server_config`, default 3h | [[Tabella cfg_server]] |
 | 8 | Valuta: **solo EUR**; un solo **bucket privato** per tutti i relatori | [[Storage R2]] |
 | 9 | Rimborsi e dispute: **gestione solo manuale** in v1 | [[Sistema masterclass]] |
 

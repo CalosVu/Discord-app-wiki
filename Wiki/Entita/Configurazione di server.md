@@ -12,9 +12,9 @@ stato: stabile
 # Configurazione di server
 
 Un parametro di comportamento dell'applicazione, modificabile **a runtime dal database** senza
-ricompilare né riavviare. Tabella `server_config`, entità `ServerConfig`.
+ricompilare né riavviare. Tabella `cfg_server`, entità `ServerConfig`.
 
-Per l'elenco completo dei parametri esistenti e dei loro valori vedi [[Tabella server_config]];
+Per l'elenco completo dei parametri esistenti e dei loro valori vedi [[Tabella cfg_server]];
 questa pagina descrive **il meccanismo**.
 
 ## Struttura
@@ -56,6 +56,6 @@ i risultati sono più di uno. Prima di un `INSERT` in produzione conviene sempre
 chiave non esista già.
 
 ## Voci correlate
-- [[Tabella server_config]]
+- [[Tabella cfg_server]]
 - [[Blocco dei pagamenti]]
 - [[Schema del database]]

@@ -39,7 +39,7 @@ l'impianto concettuale è sopravvissuto, i dettagli tecnici no.
 | Blockchain **Solana**, verifica via **Solscan API**, importi in SOL/lamport | La rete è **Arbitrum One**, i token **USDT/USDC** (ERC-20, 6 decimali), la verifica è via **Web3j** su nodo RPC. Vedi [[Pagamenti crypto Arbitrum]] |
 | Comandi `!iscrizione` e `!verifica_iscrizione` | I comandi reali sono `!Donazione` e `!verifica-transazione` ([[Comandi utente]]) |
 | Scheduler **alle 04:00** | Cron reale `0 0 22 * * *` — le 22:00 UTC, corrispondenti alla mezzanotte italiana ([[Batch verifica abbonamenti]]) |
-| Rinnovo entro **5 giorni**, poi degrado | Il ritardo tollerato è configurabile: `N_GIORNI_DOPO_SCADENZA`, oggi **3** ([[Tabella server_config]]) |
+| Rinnovo entro **5 giorni**, poi degrado | Il ritardo tollerato è configurabile: `N_GIORNI_DOPO_SCADENZA`, oggi **3** ([[Tabella cfg_server]]) |
 | Massimo **3 tentativi ogni 24h** | Finestra e numero sono configurabili: `N_TENTATIVI_VERIFICA` = 3 in `TEMPO_LIMITE_VERIFICA` = 2 ore |
 | L'importo deve corrispondere **esattamente** | Il codice accetta importi **maggiori o uguali** all'atteso (sovra-pagamento ammesso) |
 | Campo `numero_tentativi` in `user_verify_transaction` | Non esiste: i tentativi si contano con una query sulla finestra temporale |

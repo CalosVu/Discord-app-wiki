@@ -35,9 +35,9 @@ Traccia dell'intenzione originale documentata in [[DOC_PROGETTO]].
 | `PENDING` | ❌ mai scritto |
 | `FAILED` | ❌ mai scritto |
 
-Vale sia per `payments` (su **due** colonne, `stato_verifica` e `status`) sia per
-`pagamenti_masterclass`. Un pagamento fallito semplicemente **non produce una riga**: l'esito
-negativo di una verifica crypto finisce in [[Tentativo di verifica transazione]], non in `payments`.
+Vale sia per `pagamenti` (su **due** colonne, `stato_verifica` e `status`) sia per
+`masterclass_pagamenti`. Un pagamento fallito semplicemente **non produce una riga**: l'esito
+negativo di una verifica crypto finisce in [[Tentativo di verifica transazione]], non in `pagamenti`.
 
 ⚠️ Le query di bilancio filtrano su **`stato_verifica`**: è quel campo che va usato nelle nuove query.
 
