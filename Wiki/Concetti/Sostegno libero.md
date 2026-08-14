@@ -19,7 +19,7 @@ La donazione di importo libero: non dà accesso ai canali, dà un **badge di ric
 - viene creato un [[Pagamento]] con `transactionType = GOLD_SUPPORTER_MEMBER`;
 - viene assegnato il ruolo `GOLD_SUPPORTER_MEMBER` ([[Ruoli Discord]]);
 - viene aggiornata `dataUltimaDonazione` sull'[[Utente]];
-- **non** vengono toccati scadenza, `numeroRinnovi` né `abilitato`.
+- **non** vengono toccati scadenza né `numeroRinnovi`: la donazione non è un abbonamento.
 
 I messaggi promettono il badge «per 30 giorni», ma **nulla lo rimuove**: il codice che avrebbe
 tolto il ruolo dopo 30 giorni esiste ma è **commentato** dentro il

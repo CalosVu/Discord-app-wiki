@@ -5,7 +5,7 @@ alias: [referral_agent, ReferralAgent, codice invito]
 tag: [dominio/referral]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-14
 stato: stabile
 ---
 
@@ -24,21 +24,39 @@ Automaticamente, dal `InviteListener` ([[Onboarding e disclaimer]]):
 - **all'avvio del bot** (`onReady`) tutti gli inviti esistenti della guild vengono sincronizzati;
 - **alla creazione** di un nuovo invito (`onGuildInviteCreate`) la riga viene aggiunta o aggiornata.
 
-La sincronizzazione aggiorna solo `nomeAgente` e `limiteUtilizzi` sulle righe già presenti: gli
-altri campi restano quelli del primo inserimento.
+La sincronizzazione aggiorna solo `nomeAgente` sulle righe già presenti: gli altri campi restano
+quelli del primo inserimento.
 
 ## Campi
 
 | Campo | Colonna | Note |
 |---|---|---|
 | `codiceReferral` | `codice_referral` | il codice dell'invito, es. `3WHCEvZT`. `UNIQUE` |
-| `idDiscordAgente` | `id_discord_agente` | Discord ID di chi ha creato l'invito |
+| `idDiscordAgente` | `id_discord_agente` | Discord ID di chi ha creato l'invito. **Non univoco**: un utente può generare più inviti — nei dati reali fino a 22 |
 | `nomeAgente` | `nome_agente` | username di chi l'ha creato |
-| `commissionePercentuale` | `commissione_percentuale` | ⚠️ **sempre 0.00**: non è questa la percentuale usata |
-| `descrizioneReferral` | `descrizione_referral` | testo libero (`"Utente"`, `"Admin"`) |
-| `limiteUtilizzi` | `limite_utilizzi` | copiato da `maxUses` dell'invito Discord, se > 0 |
+| `tipo` | `tipo` | `ENUM('UTENTE','ADMIN')`: chi ha generato il codice |
 | `utilizzi` | `utilizzi` | utilizzi **già attribuiti** a un utente: è la baseline dell'attribuzione |
+| `dataCreazione`, `dataUpdate` | idem | audit |
 | `utentiReferiti` | (relazione) | gli [[Utente|utenti]] entrati con quel codice |
+
+> [!warning] Eliminate da `V15` il 2026-08-14
+> **`commissione_percentuale`** valeva `0.00` su tutte e 157 le righe: la percentuale applicata la
+> legge `CommissioneService` da [[Agente]], mai da qui. Era il residuo del modello in cui codice
+> invito e agente erano la stessa cosa.
+>
+> **`limite_utilizzi`** era valorizzata su 1 riga su 157; la query `findReferralAlLimite()` e il
+> metodo `isAttivo()` che la usavano non avevano chiamanti — e `isAttivo()`, verificando solo il
+> limite, restituiva sempre `true`.
+>
+> **`data_attivazione`** coincideva con la data di creazione.
+>
+> **`descrizione_referral`** è diventata `tipo`: era un `TEXT` con due soli valori.
+>
+> Con esse è stato ridotto `ReferralAgentService`, da 153 righe a 58: creazione, aggiornamento e
+> associazione utente-referral erano **tutti metodi senza chiamanti**, superati da `AgentiService`
+> e `CommissioneService` quando gli agenti hanno preso tabella propria. La classe iniettava anche
+> **due volte lo stesso repository** con nomi diversi, uno per lo strato vivo e uno per quello
+> morto.
 
 ## La colonna `utilizzi` (dalla migration V3)
 
@@ -52,22 +70,24 @@ identifica l'invito usato da un nuovo membro ([[Sistema referral e commissioni]]
 - una riga creata *ex novo* nasce già allineata al contatore reale, per non generare differenze
   fittizie.
 
-## ⚠️ La percentuale qui non conta
+## La percentuale non sta qui
 
-`referral_agent.commissione_percentuale` esiste ed è sempre `0.00`. La percentuale che il sistema
-applica davvero sta su **`agenti.commissione_percentuale`** ([[Agente]]). Il collegamento è:
+Questa tabella dice **chi ha portato chi**, non quanto gli spetta. La percentuale è su
+`referral_agenti.commissione_percentuale` ([[Agente]]), e il collegamento è:
 
 ```
-Utente.referral → referral_agent.id_discord_agente → agenti.discord_id → percentuale
+utenti.referral_id → referral_utenti.id_discord_agente → referral_agenti.discord_id → percentuale
 ```
 
-Chi ha creato l'invito diventa quindi remunerato **solo se** risulta anche nella tabella `referral_agenti`.
-Vedi [[Sistema referral e commissioni]].
+Chi crea un invito diventa quindi remunerato **solo se** risulta anche fra gli agenti. Fino a `V15`
+esisteva una `commissione_percentuale` anche qui, sempre a `0.00`: il residuo del modello in cui le
+due cose erano una sola. Vedi [[Sistema referral e commissioni]].
 
-## Un agente, molti codici
+## Un utente, molti codici
 
-Lo stesso Discord ID può comparire su più righe (più inviti creati). Il campo
-`agenti.codici_ref_validi`, se valorizzato, restringe la commissione ai soli codici elencati.
+Lo stesso Discord ID compare su più righe, una per invito creato — nei dati reali fino a 22 per la
+stessa persona. Fra questi, `referral_agenti.codici_ref_validi` sceglie quali danno diritto a
+commissione: se è vuoto valgono tutti.
 
 ## Voci correlate
 - [[Agente]]

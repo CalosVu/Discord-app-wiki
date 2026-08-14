@@ -5,7 +5,7 @@ alias: [user_verify_transaction, UserVerifyTransaction]
 tag: [dominio/pagamenti]
 fonti: [Codice Discord-access-app, Integrazione sistema pagamenti]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-14
 stato: stabile
 ---
 
@@ -30,7 +30,7 @@ A due cose insieme:
 | `transactionHash` | `transaction_hash` | l'hash tentato (anche se inesistente) |
 | `dataVerifica` | `data_verifica` | ora italiana del tentativo |
 | `esito` | `esito` | booleano |
-| `messaggio` | `messaggio` | `"Successo"` oppure il messaggio d'errore completo |
+| `messaggioEsito` | `messaggio_esito` | `"Successo"` oppure il messaggio d'errore completo |
 
 ## Il rate limiting
 

@@ -31,7 +31,7 @@ altrimenti (scadenza futura, rinnovo anticipato):
     nuova scadenza = scadenza + giorni        ← i giorni residui NON si perdono
 ```
 
-Poi, sempre: `numeroRinnovi += 1`, `abilitato = true`, `dataUltimaDonazione = adesso`,
+Poi, sempre: `numeroRinnovi += 1`, `dataUltimaDonazione = adesso`,
 `ultimoPagamento` = il [[Pagamento]] appena creato, assegnazione del ruolo.
 
 **Il rinnovo anticipato è premiato**: chi rinnova prima della scadenza somma i giorni invece di

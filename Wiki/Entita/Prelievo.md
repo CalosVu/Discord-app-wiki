@@ -5,7 +5,7 @@ alias: [track_prelievi, TrackPrelievi, uscita]
 tag: [dominio/pagamenti]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-14
 stato: stabile
 ---
 

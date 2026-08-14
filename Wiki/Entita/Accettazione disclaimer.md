@@ -5,7 +5,7 @@ alias: [disclaimer_accept, DisclaimerAccept]
 tag: [dominio/utenti]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-14
 stato: stabile
 ---
 
@@ -20,7 +20,7 @@ Registra chi ha accettato le regole del server reagendo con ✅ al messaggio del
 |---|---|---|
 | `discordId` | `discord_id` | `UNIQUE`; usato come FK da `sys_log_server` |
 | `accettato` | `accettato` | booleano, aggiornato in entrambe le direzioni |
-| `dataAccettazione` | `data_accettazione` | timestamp di default |
+| `dataUltimaReazione` | `data_ultima_reazione` | riscritta a ogni cambio: dice quando ha accettato o revocato |
 
 ## Il gate di tutto il resto
 

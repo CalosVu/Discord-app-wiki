@@ -92,6 +92,61 @@ registrabile un evento solo per chi aveva accettato il disclaimer ([[Log operati
 | `V9__pulizia_config_inutilizzate.sql` | elimina `PERCENTUALE_COMMISSIONI_STRIPE` e `QUOTA_FISSA_COMM_STRIPE`, che nessun codice legge |
 | `V10__percentuale_stripe_secondario.sql` | aggiunge `PERCENTUALE_STRIPE_SECONDARIO` ([[Bilanciamento degli account Stripe]]) |
 | `V11__rinomina_tabelle_e_log.sql` | rinomina le tabelle per dominio, elimina `snapshot_bilancio`, sostituisce `log_service` con `sys_log_server` |
+| `V12__utenti_pulizia_colonne_morte.sql` | elimina `utenti.abilitato` e `utenti.disclaimer_id`, scritte e mai lette |
+| `V13__utenti_disclaimer_reazione.sql` | `discord_id` a `varchar(64)`; `data_accettazione` → `data_ultima_reazione` |
+| `V14__campi_uniformi_pagamenti_utenti.sql` | nomi e ordine dei campi di `pagamenti`, `pagamenti_prelievi`, `pagamenti_utenti_verifiche`, `utenti` |
+| `V15__referral_utenti_pulizia.sql` | elimina `commissione_percentuale`, `limite_utilizzi`, `data_attivazione`; `descrizione_referral` → `tipo` (`ENUM`) |
+| `V16__referral_agenti_audit.sql` | `data_inserimento` → `data_update` e riordino delle colonne |
+| `V17__commissioni_importo_congelato.sql` | `referral_commissioni.importo_commissione`: l'importo non viene più ricalcolato a ogni lettura |
+
+### La convenzione sui campi di audit
+
+Prima esistevano **quattro nomi per la stessa cosa** — `created_at`, `data_creazione`,
+`data_inserimento`, `data_creazione_account` — più `data_aggiornamento` e `data_modifica`. Ora la
+regola è una: **`data_update`**, con `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`, in
+fondo alla tabella. Registra l'ultima volta che la riga è stata toccata.
+
+Due eccezioni volute:
+
+- **`pagamenti_utenti_verifiche` non ha audit**: `data_verifica` *è* l'evento e la riga non viene
+  mai modificata. Aggiungerlo sarebbe rumore.
+- **`utenti` conserva anche `data_ingresso_server`** accanto a `data_update`: quella riga cambia di
+  continuo (disclaimer, pagamenti, rinnovi, degradi) e senza un campo dedicato si perderebbe
+  quando l'utente è entrato nel server — dato non ricostruibile da altre fonti.
+
+### Date che sembravano ridondanti e non lo erano
+
+`pagamenti` ha sia `data_pagamento` sia `data_update`; `pagamenti_prelievi` sia `data_prelievo`
+sia `data_update`. Sembrano doppioni, ma i dati dicono il contrario:
+
+| | Righe | Coincidono | Differiscono | Scarto max |
+|---|---|---|---|---|
+| `pagamenti` | 205 | 50 | **155** | ~14 ore |
+| `pagamenti_prelievi` | 47 | 35 | **12** | ~61 giorni |
+
+La prima è **quando il fatto è avvenuto** (transazione on-chain, evento Stripe, prelievo
+effettivo), la seconda **quando l'applicazione lo ha saputo**. Nelle crypto l'utente paga e
+verifica col bot anche molto dopo; un prelievo può essere registrato due mesi più tardi.
+
+### ⚠️ Rinominare un campo ha tre superfici d'impatto, non una
+
+Le tabelle si rinominano senza toccare le query, perché JPQL usa i nomi delle *entità*. **I campi
+no**: rinominarne uno rompe anche le query, e in modi che il compilatore non vede.
+
+| Superficie | Quando si scopre l'errore |
+|---|---|
+| getter, setter, builder | compilazione |
+| `@Query` JPQL che nomina l'attributo | **avvio dell'applicazione** |
+| derived query (`findByPaymentMethod`) | avvio, e cambia il nome del metodo |
+
+Successo con `V14`: dopo la build verde l'applicazione non partiva con
+`Could not resolve attribute 'paymentMethod' of 'Payments'`. Le `@Query` sono stringhe e le
+derived query sono convenzioni sui nomi: `mvn` non le controlla.
+
+Peggio, **l'avvio si ferma al primo repository che fallisce**: correggendo solo ciò che l'eccezione
+nomina si scopre l'errore successivo al riavvio dopo, uno alla volta. Il modo efficiente è
+elencare in un colpo tutti gli attributi citati in tutte le `@Query` e tutte le derived query del
+progetto, e confrontarli con i campi rinominati.
 
 ### Rinominare tabelle senza rompere le chiavi esterne
 

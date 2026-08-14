@@ -76,7 +76,7 @@ più una notifica agli admin: «L'utente **X** è stato degradato e non è più 
 Due conseguenze importanti:
 
 - lo status di [[Membri pionieri]] è perso **definitivamente**: nessun codice lo ripristina;
-- `abilitato` resta `true`: non è un indicatore affidabile di abbonamento attivo.
+- il campo `abilitato` è stato eliminato il 2026-08-13: proprio perché il degrado non lo toccava, non era un indicatore affidabile ([[Utente]]).
 
 ## Il promemoria è a giorno esatto
 

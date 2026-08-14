@@ -5,7 +5,7 @@ alias: [agenti, Agente referral]
 tag: [dominio/referral]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-14
 stato: stabile
 ---
 
@@ -31,7 +31,7 @@ essere censito** ([[Utente]]).
 | `username` | `username` | mostrato nei report |
 | `commissionePercentuale` | `commissione_percentuale` | **la** percentuale che conta (es. `10.00`) |
 | `codiciRefValidi` | `codici_ref_validi` | opzionale: elenco di codici separati da virgola |
-| `dataInserimento` | `data_inserimento` | `@CreationTimestamp` |
+| `dataUpdate` | `data_update` | ultima scrittura della riga; ex `data_inserimento` (`V16`) |
 
 ## Il filtro `codici_ref_validi`
 
@@ -42,6 +42,20 @@ Se **valorizzato** (es. `"3WHCEvZT,anJKHdkU"`) → la commissione matura **solo*
 l'utente è entrato compare nella lista. Serve a distinguere gli inviti "di lavoro" da quelli
 personali. Lo stesso campo filtra anche l'elenco dei link mostrati dal comando `!mieiref`
 ([[Comandi agenti]]).
+
+### ⚠️ È una regola di business scritta in una stringa
+
+Sembra la lista denormalizzata di codici che stanno già in [[Referral agent|referral_utenti]], ma
+non lo è: è una **scelta**, e sta solo qui. Il formato però non ha alcun vincolo di integrità, e
+sono tre i modi in cui può tradire senza far rumore:
+
+1. un codice cancellato da `referral_utenti` **resta nella stringa**;
+2. un refuso nel codice fa **saltare la commissione in silenzio** — l'unico segno è un
+   `log.debug("Codice referral … non incluso tra i codici validi")`;
+3. la colonna è `varchar(255)`: con codici da 8-10 caratteri ci stanno una ventina di voci, e oltre
+   quel punto **la lista si tronca**, facendo sparire la commissione sui codici tagliati.
+
+È il primo posto da guardare se un agente segnala una commissione attesa che non è mai arrivata.
 
 ## Cosa può fare un agente
 
