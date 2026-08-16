@@ -5,7 +5,7 @@ alias: [Entità, oggetti del dominio]
 tag: [dominio/entita]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-16
 stato: stabile
 ---
 
@@ -25,7 +25,7 @@ relazioni, vedi [[Schema del database]].
 
 ## Offerta e prezzi
 
-- [[Catalogo servizi]] — piani BASIC / PIONIERE e promozioni. Tabella `cfg_catalogo_servizi`.
+- [[Catalogo servizi]] — piani BASIC / PIONIERE in `cfg_piani`, offerte a tempo in `cfg_promo`.
 - [[Masterclass]] — il singolo contenuto video in vendita. Tabella `masterclass`.
 
 ## Movimenti di denaro

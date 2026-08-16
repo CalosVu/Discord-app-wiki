@@ -5,7 +5,7 @@ alias: [User, users, membro]
 tag: [dominio/utenti]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-14
+aggiornato: 2026-08-15
 stato: stabile
 ---
 
@@ -64,7 +64,8 @@ come rete di sicurezza per chi era già membro del server prima di questo flusso
 | `dataScadenzaIscrizione` | `data_scadenza_iscrizione` | scadenza dell'abbonamento; `null` dopo il degrado |
 | `dataUltimaDonazione` | `data_ultima_donazione` | aggiornata da **entrambi** i tipi di pagamento |
 | `numeroRinnovi` | `n_rinnovi` | incrementato a ogni pagamento Supporter Member (anche il primo) |
-| `membroPioniere` | `membro_pioniere` | prezzo agevolato; azzerato dal degrado ([[Membri pionieri]]) |
+| `membroPioniere` | `membro_pioniere` | gode del prezzo agevolato **adesso**; azzerato dal degrado ([[Membri pionieri]]) |
+| `pioniereStorico` | `pioniere_storico` | ha consumato un posto pioniere, **per sempre**: non viene mai riazzerato |
 | `dataIngressoServer` | `data_ingresso_server` | primo ingresso nel server; ex `data_creazione_account` |
 | `dataUpdate` | `data_update` | ultima scrittura della riga |
 | `ultimoPagamento` | `payment_id` | 1-a-1 con l'ultimo [[Pagamento]] Supporter Member |
@@ -75,11 +76,13 @@ come rete di sicurezza per chi era già membro del server prima di questo flusso
 
 1. **Censimento** all'ingresso nel server, ruolo di new entry.
 2. **Primo pagamento** → scadenza = ora + `durataGiorniAbbonamento × mesi`, `dataPrimaIscrizione`
-   valorizzata, ruolo `SUPPORTER_MEMBER` ([[Abbonamento Supporter Member]]).
+   valorizzata, ruolo `SUPPORTER_MEMBER` ([[Abbonamento Supporter Member]]). Qui viene assegnato il
+   posto pioniere, se ne restano ([[Membri pionieri]]).
 3. **Rinnovo anticipato** (scadenza futura) → i giorni si **sommano** a quelli residui.
 4. **Rinnovo dopo la scadenza** → la scadenza riparte da adesso.
 5. **Degrado**, N giorni dopo la scadenza → ruolo `GUEST`, `membroPioniere = false`, piano riportato
-   a BASIC, `dataScadenzaIscrizione = null` ([[Batch verifica abbonamenti]]).
+   a BASIC, `dataScadenzaIscrizione = null` ([[Batch verifica abbonamenti]]). `pioniereStorico`
+   resta a `true`: il posto non torna disponibile.
 
 ## Trappole note
 

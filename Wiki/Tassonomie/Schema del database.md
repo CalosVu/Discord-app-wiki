@@ -5,7 +5,7 @@ alias: [database, tabelle, DDL, migrazioni]
 tag: [dominio/database]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-13
+aggiornato: 2026-08-16
 stato: stabile
 ---
 
@@ -27,7 +27,8 @@ vicine in ordine alfabetico, e non convivono più due lingue (`users` accanto a 
 |---|---|---|---|
 | `cfg_server` | `server_config` | `ServerConfig` | [[Configurazione di server]] |
 | `cfg_testi` | `text_config` | `TextConfig` | [[Tabella cfg_server]] |
-| `cfg_catalogo_servizi` | `catalogo_servizi` | `CatalogoServizi` | [[Catalogo servizi]] |
+| `cfg_piani` | `catalogo_servizi` → `cfg_catalogo_servizi` | `Piano` | [[Catalogo servizi]] |
+| `cfg_promo` | *(era nella stessa tabella dei piani)* | `Promo` | [[Promozioni temporali]] |
 | `utenti` | `users` | `User` | [[Utente]] |
 | `utenti_lifetime` | — | `UtentiLifetime` | [[Utente lifetime]] |
 | `utenti_disclaimer` | `disclaimer_accept` | `DisclaimerAccept` | [[Accettazione disclaimer]] |
@@ -60,14 +61,14 @@ richiesto di ricrearli uno per uno.
 ## Le relazioni portanti
 
 ```
-referral_utenti ─┬──< utenti >──── cfg_catalogo_servizi   (piano_applicato_id)
+referral_utenti ─┬──< utenti >──── cfg_piani              (piano_applicato_id)
                  │       │  │
                  │       │  └──── utenti_disclaimer       (1-a-1)
                  │       │  └──── pagamenti               (ultimo pagamento, 1-a-1)
                  │       ├──< referral_agenti ──< referral_commissioni >── pagamenti
                  │       ├──< masterclass_relatori ──< masterclass ──< masterclass_pagamenti
                  │       └──< pagamenti_utenti_verifiche
-                 └──< cfg_catalogo_servizi    (promo per referral)
+                 └──< cfg_promo               (promo riservata a un referral)
 ```
 
 Particolarità: `pagamenti` ha **due** FK verso `utenti` — su `user_id` e su `discord_id`.
@@ -98,11 +99,27 @@ registrabile un evento solo per chi aveva accettato il disclaimer ([[Log operati
 | `V15__referral_utenti_pulizia.sql` | elimina `commissione_percentuale`, `limite_utilizzi`, `data_attivazione`; `descrizione_referral` → `tipo` (`ENUM`) |
 | `V16__referral_agenti_audit.sql` | `data_inserimento` → `data_update` e riordino delle colonne |
 | `V17__commissioni_importo_congelato.sql` | `referral_commissioni.importo_commissione`: l'importo non viene più ricalcolato a ogni lettura |
+| `V18__masterclass_audit.sql` | `masterclass.data_creazione` → `data_update` |
+| `V19__masterclass_relatori_audit.sql` | `masterclass_relatori.data_inserimento` → `data_update`; commento su `stripe_account_id` |
+
+### Colonne vuote che NON sono residui
+
+Durante la revisione sono state eliminate diverse colonne perché nessuno le leggeva. Il criterio
+non è però «è vuota, quindi va via»: conta se **esiste un percorso di codice che può valorizzarla**.
+
+`masterclass_relatori.stripe_account_id` è `NULL` sull'unico relatore esistente, ma resta: serve al
+modello di pagamento **Connect**, congelato e selezionabile a runtime con
+`MASTERCLASS_PAYMENT_MODE=connect`. Il suo codice — strategia, servizio, resolver, controller
+webhook — è tutto presente e funzionante ([[Relatore]], [[Sistema masterclass]]).
+
+La differenza con `snapshot_bilancio` o `utenti.abilitato`, eliminate, è che lì il codice era
+commentato o irraggiungibile: nessuna configurazione poteva riattivarlo.
 
 ### La convenzione sui campi di audit
 
 Prima esistevano **quattro nomi per la stessa cosa** — `created_at`, `data_creazione`,
-`data_inserimento`, `data_creazione_account` — più `data_aggiornamento` e `data_modifica`. Ora la
+`data_inserimento`, `data_creazione_account` — più `data_aggiornamento` e `data_modifica`
+(quest'ultimo su `cfg_testi`, allineato da `V24`). Ora la
 regola è una: **`data_update`**, con `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`, in
 fondo alla tabella. Registra l'ultima volta che la riga è stata toccata.
 
@@ -117,7 +134,7 @@ Due eccezioni volute:
 ### Date che sembravano ridondanti e non lo erano
 
 `pagamenti` ha sia `data_pagamento` sia `data_update`; `pagamenti_prelievi` sia `data_prelievo`
-sia `data_update`. Sembrano doppioni, ma i dati dicono il contrario:
+sia `data_update`; `masterclass_pagamenti` idem. Sembrano doppioni, ma i dati dicono il contrario:
 
 | | Righe | Coincidono | Differiscono | Scarto max |
 |---|---|---|---|---|
@@ -127,6 +144,10 @@ sia `data_update`. Sembrano doppioni, ma i dati dicono il contrario:
 La prima è **quando il fatto è avvenuto** (transazione on-chain, evento Stripe, prelievo
 effettivo), la seconda **quando l'applicazione lo ha saputo**. Nelle crypto l'utente paga e
 verifica col bot anche molto dopo; un prelievo può essere registrato due mesi più tardi.
+
+Su `masterclass_pagamenti` la tabella è ancora vuota, ma lo scarto è garantito dal flusso: la
+riconciliazione della fee riscrive `commissione_stripe`, `importo_netto_relatore` e `fee_pending`
+ore dopo l'acquisto ([[Pagamento masterclass]]).
 
 ### ⚠️ Rinominare un campo ha tre superfici d'impatto, non una
 
@@ -234,6 +255,29 @@ spettano gli indicatori e a chi è riconducibile una commissione di affiliazione
 
 L'ipotesi è di gestirla un domani da interfaccia; finché non accade resta alimentata manualmente.
 Hibernate con `validate` ignora le tabelle in più, quindi la sua presenza non disturba l'avvio.
+
+Revisionata il 2026-08-16 e **lasciata volutamente com'è**: nessuna entità, nessuna migration.
+Finché la si compila a mano, mapparla aggiungerebbe solo codice da mantenere.
+
+| Colonna | Contenuto |
+|---|---|
+| `user_id` | riferimento all'[[Utente]], `UNIQUE`. **Senza chiave esterna**: come per il [[Log operativo]], il registro deve sopravvivere alla cancellazione di un utente |
+| `username` | snapshot al momento dell'inserimento |
+| `blofin`, `mexc` | UID sull'exchange, numerici |
+| `tradingview` | account TradingView a cui assegnare gli indicatori |
+| `trigger`, `flow_x`, `edge_reversal` | indicatori assegnati, uno per prodotto |
+| `indicators` | **non è la somma dei tre**: 10 righe su 24 hanno `indicators = 1` e nessun indicatore specifico attivo. Sono due informazioni diverse, e chi lo eliminasse come ridondante perderebbe quelle dieci |
+
+Verificato il 2026-08-16: i 24 `user_id` puntano tutti a utenti esistenti, nessun riferimento
+orfano.
+
+> [!warning] `trigger` è una parola riservata SQL
+> `SELECT trigger FROM affiliazioni_exchange` **è un errore di sintassi**: serve `` `trigger` `` con
+> i backtick. Oggi non fa danni perché nessun codice tocca la tabella, ma il giorno che la si
+> mappasse in JPA, Hibernate genererebbe SQL non quotato e l'applicazione non partirebbe — servirebbe
+> ``@Column(name = "`trigger`")``.
+>
+> Rinominarla oggi costerebbe nulla; la scelta di lasciarla è consapevole, non una svista.
 
 ⚠️ **Non cancellarla** durante le pulizie dello schema: l'assenza di riferimenti nel codice la fa
 sembrare orfana, ma i dati che contiene non sono ricostruibili da nessun'altra parte.

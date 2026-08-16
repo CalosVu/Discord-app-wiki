@@ -5,7 +5,7 @@ alias: [sys_log_server, LogServer, LogServerService, log]
 tag: [dominio/infrastruttura]
 fonti: [Codice Discord-access-app]
 creato: 2026-08-13
-aggiornato: 2026-08-13
+aggiornato: 2026-08-16
 stato: stabile
 ---
 
@@ -62,6 +62,17 @@ con il ruolo attivo.
 | `idx_sys_log_tipo` | quanti eventi di questo tipo |
 
 Le tre letture di `LogServerRepository` corrispondono a queste tre domande.
+
+## Quanto si conserva
+
+Il batch delle 22:00 cancella le righe più vecchie di `LOG_CONSERVAZIONE_GIORNI`
+([[Tabella cfg_server]]), impostata a **365** — un anno.
+
+Il numero fa anche da interruttore: **`0` conserva tutto**, ed è il valore assunto anche se la
+chiave manca o non contiene un numero. Nessuna riga deve sparire per una configurazione sbagliata.
+
+> La pulizia viene eseguita **dopo il backup**, non prima: così quello che si cancella resta
+> comunque recuperabile dall'ultimo backup. Un errore nella pulizia non ferma il resto del batch.
 
 ## Storia / claim superate
 

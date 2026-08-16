@@ -5,7 +5,7 @@ alias: [cfg_server, server_config, configurazioni runtime, parametri]
 tag: [dominio/configurazione]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-13
+aggiornato: 2026-08-16
 stato: stabile
 ---
 
@@ -20,7 +20,10 @@ senza deploy né riavvio. Per il funzionamento del meccanismo vedi [[Configurazi
 |---|---|---|---|---|---|
 | 1 | `N_TENTATIVI_VERIFICA` | `3` | `3` | `CryptoPaymentService` | numero massimo di tentativi di verifica crypto nella finestra |
 | 2 | `TEMPO_LIMITE_VERIFICA` | `2` | `2` | `CryptoPaymentService` | ampiezza della finestra, in **ore** |
-| 3 | `PIONIERI` | `50` | — | ⚠️ **nessuno** | «numero utenti da considerare come pionieri oltre 4 di staff». Non letto da alcun codice |
+| — | `LOG_CONSERVAZIONE_GIORNI` | `365` | `0` | `VerificaAbbonamentiBatch` | giorni di conservazione del [[Log operativo]]. `0` conserva tutto |
+| — | `PIONIERI_ABILITATI` | `true` | `false` | `PianoUtenteService` | interruttore del meccanismo. A `false` tutti pagano `BASIC` |
+| 3 | `PIONIERI` | `50` | `0` | `PianoUtenteService` | tetto dei posti pioniere. Default 0: se la chiave manca non nascono pionieri per sbaglio |
+| — | `PIONIERI_ASSEGNATI` | quelli esistenti | `0` | `PianoUtenteService` | posti già consumati. **Non si decrementa mai** |
 | 4 | `N_GIORNI_DOPO_SCADENZA` | `3` | `3` | `VerificaAbbonamentiBatch` | giorni di tolleranza dopo la scadenza prima del degrado |
 | 5 | `N_ORE_DURATA_LINK_STRIPE` | `5` | `5` | `StripePaymentService` | validità del link di checkout per le donazioni, in ore |
 | 6 | `MASTERCLASS_DURATA_LINK_ORE` | `3` | `3` | `MasterclassPaymentNotificationService` | validità del presigned URL R2 della masterclass, in ore |
@@ -110,8 +113,18 @@ blocco note: non fanno danno, ma non sono configurazione dell'applicazione.
 **riusciti**, non solo quelli errati; il messaggio all'utente cita valori fissi «3 tentativi in 2h»
 anche se la configurazione cambia. Vedi [[Tentativo di verifica transazione]].
 
-**`PIONIERI`** — residuo di un'idea mai implementata: nessun meccanismo promuove automaticamente i
-primi N iscritti. Il flag `membro_pioniere` si imposta a mano ([[Membri pionieri]]).
+**`LOG_CONSERVAZIONE_GIORNI`** — il batch delle 22:00 cancella le righe di `sys_log_server` più
+vecchie di tanti giorni. Il numero fa anche da interruttore: `0` conserva tutto, ed è il valore
+assunto anche se la chiave manca o non contiene un numero — nessun log deve sparire per una
+configurazione sbagliata. La pulizia avviene **dopo** il backup ([[Log operativo]]).
+
+**`PIONIERI_ABILITATI`** — spegne l'intero meccanismo dei [[Membri pionieri]]: tutti gli utenti
+tornano allo stesso livello e pagano `BASIC`, promo comprese. Nulla viene perso, è reversibile.
+
+**`PIONIERI` e `PIONIERI_ASSEGNATI`** — il tetto dei posti pioniere e quelli già consumati. Alzare
+il tetto riapre le assegnazioni; abbassarlo sotto il valore di `PIONIERI_ASSEGNATI` le chiude, senza
+togliere nulla a chi il posto ce l'ha già. Il contatore lo incrementa il codice al pagamento: se
+assegni un posto a mano scrivendo `membro_pioniere`, incrementalo anche tu ([[Membri pionieri]]).
 
 **`N_GIORNI_DOPO_SCADENZA`** — abbassarlo rende il degrado più aggressivo; alzarlo lascia l'accesso
 più a lungo dopo la scadenza. Vedi [[Batch verifica abbonamenti]].

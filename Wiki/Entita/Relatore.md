@@ -5,7 +5,7 @@ alias: [relatori, Relatore masterclass]
 tag: [dominio/masterclass]
 fonti: [Codice Discord-access-app, Piano sviluppo masterclass]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-15
 stato: stabile
 ---
 
@@ -26,12 +26,29 @@ Chi pubblica e vende [[Masterclass]] sul server. Tabella `masterclass_relatori`,
 | `discordId` | `discord_id` | chiave di riconoscimento per `!miemasterclass` |
 | `user` | `user_id` | riferimento all'[[Utente]] |
 | `username` | `username` | mostrato nei menu di acquisto e nei report |
-| `stripeAccountId` | `stripe_account_id` | `acct_xxx` del connected account. **NULL nel modello attivo** |
+| `stripeAccountId` | `stripe_account_id` | `acct_xxx` del connected account. **NULL nel modello attivo**, vedi sotto |
 | `attivo` | `attivo` | se `false` il relatore sparisce dal menu di acquisto |
-| `dataInserimento` | `data_inserimento` | `@CreationTimestamp` |
+| `dataUpdate` | `data_update` | ultima scrittura della riga; ex `data_inserimento` (`V19`) |
 
 La percentuale trattenuta dal server **non** sta qui: è per singola masterclass
-(`masterclass.percentuale_server`).
+(`masterclass.percentuale_server`), quindi lo stesso relatore può avere accordi diversi per corsi
+diversi.
+
+## `stripe_account_id` è vuoto di proposito
+
+Non è una configurazione dimenticata: la colonna **serve solo al modello Connect**, e il modello
+attivo è l'altro.
+
+| Modello | `MASTERCLASS_PAYMENT_MODE` | Usa `stripe_account_id`? |
+|---|---|---|
+| **direct** (attivo) | `direct` | no: il checkout usa la secret key del relatore da `STRIPE_MC_SK_<id>` |
+| **connect** (congelato) | `connect` | sì: `MasterclassStripeService` chiama `setStripeAccount(...)` con questo valore |
+
+Connect **non è codice morto ed è tenuto volutamente disponibile**: strategia, servizio, resolver
+delle fee e controller webhook esistono sotto il package `connect` e si attivano cambiando la
+variabile d'ambiente. È la ragione per cui la colonna non è stata eliminata durante la revisione
+dello schema, a differenza di altre colonne vuote che erano davvero residui
+([[Schema del database]]).
 
 ## ⚠️ Il numero del relatore deve combaciare in tre punti
 

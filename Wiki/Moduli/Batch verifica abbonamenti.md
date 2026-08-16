@@ -5,7 +5,7 @@ alias: [VerificaAbbonamentiBatch, batch giornaliero, degrado]
 tag: [dominio/batch]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-12
+aggiornato: 2026-08-16
 stato: stabile
 ---
 
@@ -27,31 +27,36 @@ batch partirebbe alle 22:00 locali: il valore va riletto insieme al fuso del ser
 Il resto del codice usa invece esplicitamente `DateValidator.oreItaliane()`
 (`LocalDateTime.now(ZoneId.of("Europe/Rome"))`).
 
-## Due interruttori, non uno
+## Tre attività, tre interruttori
 
-Da `V7`/`V8` il batch è governato da due chiavi indipendenti di [[Tabella cfg_server]]:
+Il batch fa tre cose indipendenti, ognuna con la propria chiave in [[Tabella cfg_server]]:
 
-| `BACKUP_DB_ABILITATO` | `BATCH_VERIFICA_ABBONAMENTI` | Alle 22:00 |
-|---|---|---|
-| `false` | `false` | nulla: il metodo esce subito |
-| `true` | `false` | solo il backup |
-| `false` | `true` | solo promemoria, scadenze e degradi |
-| `true` | `true` | backup, poi il resto |
+| Chiave | Governa | Si spegne con | Se manca |
+|---|---|---|---|
+| `BACKUP_DB_ABILITATO` | il backup del database | `false` | attiva |
+| `LOG_CONSERVAZIONE_GIORNI` | la pulizia del [[Log operativo]] | `0` | **non cancella** |
+| `BATCH_VERIFICA_ABBONAMENTI` | promemoria, scadenze e degradi | `false` | attiva |
 
-Sono separati perché il backup è l'unica rete di sicurezza sui dati: deve poter continuare anche
+Sono separate perché il backup è l'unica rete di sicurezza sui dati: deve poter continuare anche
 quando si ferma la gestione degli abbonamenti — il caso tipico è un ambiente di collaudo che lavora
-su una copia dei dati di produzione, dove i degradi colpirebbero utenti veri. Se una chiave manca
-si assume abilitata, quindi il comportamento storico resta invariato.
+su una copia dei dati di produzione, dove i degradi colpirebbero utenti veri.
+
+Le due chiavi booleane, se mancano, si assumono abilitate: il comportamento storico resta
+invariato. `LOG_CONSERVAZIONE_GIORNI` fa il contrario, perché lì la scelta prudente è non
+cancellare nulla.
 
 ## Cosa fa, nell'ordine
 
 1. **Backup del database** — `databaseBackupService.executeBackup()`, se `BACKUP_DB_ABILITATO`. Se
    fallisce il batch **prosegue**, con un warning ([[Backup del database]]).
-2. **Esclusione dei lifetime** — gli ID in `utenti_lifetime` vengono tolti dalla lista prima di ogni
+2. **Pulizia del [[Log operativo]]** — via le righe più vecchie di `LOG_CONSERVAZIONE_GIORNI`.
+   Viene **dopo il backup** di proposito: così le righe cancellate restano recuperabili
+   dall'ultimo backup. Anche qui un errore non ferma il resto.
+3. **Esclusione dei lifetime** — gli ID in `utenti_lifetime` vengono tolti dalla lista prima di ogni
    controllo ([[Utente lifetime]]).
-3. **Disattivazione delle promo scadute** — ogni `PROMO` attiva con `data_fine` passata va a
+4. **Disattivazione delle promo scadute** — ogni promo attiva con `data_fine` passata va a
    `attivo = false` ([[Promozioni temporali]]).
-4. **Ciclo su tutti gli utenti**, con `dataScadenzaIscrizione` non nulla:
+5. **Ciclo su tutti gli utenti**, con `dataScadenzaIscrizione` non nulla:
 
 | Condizione | Azione |
 |---|---|
@@ -75,7 +80,9 @@ più una notifica agli admin: «L'utente **X** è stato degradato e non è più 
 
 Due conseguenze importanti:
 
-- lo status di [[Membri pionieri]] è perso **definitivamente**: nessun codice lo ripristina;
+- lo status di [[Membri pionieri]] è perso, ma **il posto no**: `pioniere_storico` non viene toccato
+  e `PIONIERI_ASSEGNATI` non scende. Se l'utente rientra quando ci sono ancora posti liberi
+  riottiene il prezzo agevolato senza consumarne un altro; a tetto pieno paga il prezzo pieno;
 - il campo `abilitato` è stato eliminato il 2026-08-13: proprio perché il degrado non lo toccava, non era un indicatore affidabile ([[Utente]]).
 
 ## Il promemoria è a giorno esatto

@@ -5,7 +5,7 @@ alias: [pagamenti_masterclass, PagamentoMasterclass]
 tag: [dominio/masterclass, dominio/pagamenti]
 fonti: [Codice Discord-access-app, Piano sviluppo masterclass]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-14
 stato: stabile
 ---
 
@@ -31,6 +31,7 @@ assegnare).
 | `feePending` | `fee_pending` | `true` = importi ancora provvisori |
 | `stato` | `stato` | in pratica sempre `COMPLETED` |
 | `dataPagamento` | `data_pagamento` | ora italiana della registrazione |
+| `dataUpdate` | `data_update` | ultima scrittura; ex `created_at` (`V20`). Cambia con la riconciliazione della fee, quindi **non** coincide con `data_pagamento` |
 
 ## ⚠️ Gli importi sono teorici, non contabili
 

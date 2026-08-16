@@ -5,7 +5,7 @@ alias: [masterclass, corso video]
 tag: [dominio/masterclass]
 fonti: [Codice Discord-access-app, Piano sviluppo masterclass]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-15
 stato: stabile
 ---
 
@@ -33,7 +33,7 @@ Procedura **manuale in due passi** (nessun comando del bot):
 | `percentualeServer` | `percentuale_server` | quota trattenuta dal server, `NOT NULL`, per-masterclass |
 | `r2ObjectKey` | `r2_object_key` | path completo del file con estensione (`.mp4`, `.zip`, …) |
 | `attiva` | `attiva` | se `false` non è acquistabile e il relatore sparisce dal primo menu se non ne ha altre |
-| `dataCreazione` | `data_creazione` | `@CreationTimestamp` |
+| `dataUpdate` | `data_update` | ultima scrittura della riga; ex `data_creazione` (`V18`) |
 
 ## La catena che porta al file giusto
 

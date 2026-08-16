@@ -5,7 +5,7 @@ alias: [documentazione iniziale]
 tag: [fonte/documento]
 fonti: []
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-16
 stato: obsoleto
 ---
 
@@ -36,7 +36,7 @@ Il documento descrive funzionalità che **non esistono** nel codice su `main`:
 |---|---|
 | Pagamenti via **Bybit** e **PayPal** | Nessuna integrazione: si usano [[Pagamenti Stripe]] e [[Pagamenti crypto Arbitrum]]. `PAYPAL` sopravvive solo come valore enum mai usato ([[Enum di dominio]]) |
 | **2FA con Google Authenticator** (TOTP, QR code) | Assente. Nessuna classe TOTP nel codice |
-| **Anti-condivisione credenziali** (IP, User-Agent, 5 accessi, disabilitazione automatica) | Assente. Resta solo `DiscordService.revokeUserAccess`, con javadoc «AL MOMENTO NON VIENE USATO» |
+| **Anti-condivisione credenziali** (IP, User-Agent, 5 accessi, disabilitazione automatica) | Assente. Ne restava traccia in `DiscordService.revokeUserAccess`, con javadoc «AL MOMENTO NON VIENE USATO»: rimosso il 2026-08-16 con il testo `accesso.revocato` (`V24`), perché nessun comando, batch o configurazione poteva raggiungerlo |
 | Endpoint `/auth/2fa/setup`, `/payment/bybit/check`, `/payment/paypal/*`, `/user/profile` | Non esistono. Gli endpoint reali sono in [[Endpoint REST]] |
 | **Login OAuth2 Discord** come flusso applicativo con JWT | La configurazione OAuth2 esiste in `application.yml`, ma il flusso JWT **non è attivamente usato** (vedi [[Sicurezza e autenticazione]]) |
 | Tabella `tracking_user`, campi `email` e `totp_secret` su `users` | Non esistono nello [[Schema del database]] |
