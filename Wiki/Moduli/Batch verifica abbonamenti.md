@@ -5,14 +5,15 @@ alias: [VerificaAbbonamentiBatch, batch giornaliero, degrado]
 tag: [dominio/batch]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-16
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
 # Batch verifica abbonamenti
 
-L'unico job schedulato attivo del sistema. Gira **una volta al giorno** e fa quattro cose: backup,
-promemoria di rinnovo, degrado dei ruoli scaduti, disattivazione delle promo finite.
+L'unico job schedulato attivo del sistema. Gira **una volta al giorno** e fa manutenzione su più
+fronti: backup, pulizia del log, riallineamento dei nomi, promemoria di rinnovo, degrado dei ruoli
+scaduti, disattivazione delle promo finite.
 
 ## Quando gira
 
@@ -52,11 +53,14 @@ cancellare nulla.
 2. **Pulizia del [[Log operativo]]** — via le righe più vecchie di `LOG_CONSERVAZIONE_GIORNI`.
    Viene **dopo il backup** di proposito: così le righe cancellate restano recuperabili
    dall'ultimo backup. Anche qui un errore non ferma il resto.
-3. **Esclusione dei lifetime** — gli ID in `utenti_lifetime` vengono tolti dalla lista prima di ogni
+3. **Riallineamento dei nomi visualizzati** — ricarica la lista membri e aggiorna
+   `utenti.nome_visualizzato` dove è cambiato ([[Utente]]). Recupera i cambi di nickname avvenuti a
+   bot spento, che Discord non ripropone alla riaccensione.
+4. **Esclusione dei lifetime** — gli ID in `utenti_lifetime` vengono tolti dalla lista prima di ogni
    controllo ([[Utente lifetime]]).
-4. **Disattivazione delle promo scadute** — ogni promo attiva con `data_fine` passata va a
+5. **Disattivazione delle promo scadute** — ogni promo attiva con `data_fine` passata va a
    `attivo = false` ([[Promozioni temporali]]).
-5. **Ciclo su tutti gli utenti**, con `dataScadenzaIscrizione` non nulla:
+6. **Ciclo su tutti gli utenti**, con `dataScadenzaIscrizione` non nulla:
 
 | Condizione | Azione |
 |---|---|

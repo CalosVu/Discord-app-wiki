@@ -5,7 +5,7 @@ alias: [comandi bot, comandi DM]
 tag: [dominio/bot, dominio/comandi]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -29,6 +29,24 @@ iniziano con `!` e il confronto è case-insensitive.
 
 Non esiste un comando "aiuto" oltre a `!Comandi`. Un comando sconosciuto viene **ignorato in
 silenzio** (i pulsanti non riconosciuti rispondono invece «Comando non riconosciuto»).
+
+## L'interruttore generale
+
+`COMANDI_BOT_ABILITATI` a `false` spegne **tutto quanto in questa pagina**, e non solo: anche
+bottoni, menu a tendina e finestre di inserimento, quindi non basta avere un vecchio embed in chat
+per aggirarlo. A ogni tentativo il bot risponde con il testo `bot.disabilitato` e non fa altro.
+
+Il controllo sta in cinque punti — `MessageReceivedListener`, i due gestori di
+`OnButtonInteractionListener`, i due di `MenuSelectionListener` — perché quelle sono tutte e sole le
+porte da cui entra un'interazione. Nessun comando lo verifica per conto proprio.
+
+**Gli amministratori sono esenti** e continuano a operare normalmente ([[Comandi admin]]).
+L'esenzione vale su tutte le superfici, non solo su `!Admin`: quel comando apre un pannello di
+bottoni e menu, che altrimenti si aprirebbe muto.
+
+Non tocca invece ciò che non è un comando: censimento all'ingresso, disclaimer, referral, batch delle
+22:00, webhook di pagamento. Vedi [[Tabella cfg_server]], dove è spiegato anche perché per
+riaccenderlo si passa dal database.
 
 ## I cinque pulsanti di `!Comandi`
 

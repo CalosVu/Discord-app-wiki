@@ -5,7 +5,7 @@ alias: [cfg_server, server_config, configurazioni runtime, parametri]
 tag: [dominio/configurazione]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-16
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -14,12 +14,13 @@ stato: stabile
 L'elenco **completo** dei parametri di configurazione runtime: quelli modificabili dal database
 senza deploy né riavvio. Per il funzionamento del meccanismo vedi [[Configurazione di server]].
 
-## I dieci parametri
+## I parametri
 
 | id | `nome_configurazione` | Valore iniziale | Default nel codice | Chi lo legge | Effetto |
 |---|---|---|---|---|---|
 | 1 | `N_TENTATIVI_VERIFICA` | `3` | `3` | `CryptoPaymentService` | numero massimo di tentativi di verifica crypto nella finestra |
 | 2 | `TEMPO_LIMITE_VERIFICA` | `2` | `2` | `CryptoPaymentService` | ampiezza della finestra, in **ore** |
+| — | `COMANDI_BOT_ABILITATI` | `true` | `true` | `ComandiBotService` | interruttore generale delle interazioni col bot |
 | — | `LOG_CONSERVAZIONE_GIORNI` | `365` | `0` | `VerificaAbbonamentiBatch` | giorni di conservazione del [[Log operativo]]. `0` conserva tutto |
 | — | `PIONIERI_ABILITATI` | `true` | `false` | `PianoUtenteService` | interruttore del meccanismo. A `false` tutti pagano `BASIC` |
 | 3 | `PIONIERI` | `50` | `0` | `PianoUtenteService` | tetto dei posti pioniere. Default 0: se la chiave manca non nascono pionieri per sbaglio |
@@ -92,26 +93,45 @@ Il servizio **non corregge** da sé: sovrascrivere cancellerebbe una personalizz
 cercarlo. Se il nome non corrisponde a un ruolo esistente sul server, l'assegnazione fallisce con
 «Ruolo … non trovato nel server» nei log.
 
-## In produzione ce ne sono 14, non 9
+## Le tre righe che nessuno legge
 
-Verificato sul dump del 2026-08-11. Oltre alle nove sopra, esistono **cinque righe che nessuna
-riga di codice legge**:
+`Wallet CrazyHorse`, `Wallet Emme`, `Wallet Tese`: chiavi con spazi e nomi propri, che usano la
+tabella come blocco note. Nessun `getConfigurationValue` le richiede.
 
-| Chiave | Note |
-|---|---|
-| `PERCENTUALE_COMMISSIONI_STRIPE` | nessun `getConfigurationValue` la richiede |
-| `QUOTA_FISSA_COMM_STRIPE` | idem |
-| `Wallet CrazyHorse`, `Wallet Emme`, `Wallet Tese` | chiavi con spazi e nomi propri: appunti salvati a mano nella tabella |
+Hanno anche **valore e descrizione invertiti** — l'indirizzo del wallet sta in `descrizione`, la
+rete in `valore_configurazione` — e non compaiono in `V2`: sono state inserite a mano in
+produzione. Lasciate così per scelta esplicita durante la revisione del 2026-08-14.
 
-Le prime due sembrano il residuo di un calcolo commissioni fatto a mano prima che la fee venisse
-letta da Stripe ([[Riconciliazione della fee Stripe]]). Le tre «Wallet …» usano la tabella come
-blocco note: non fanno danno, ma non sono configurazione dell'applicazione.
+> Erano cinque: `PERCENTUALE_COMMISSIONI_STRIPE` e `QUOTA_FISSA_COMM_STRIPE`, residui di un calcolo
+> commissioni fatto a mano prima che la fee venisse letta da Stripe, sono state eliminate da `V9`
+> ([[Riconciliazione della fee Stripe]]).
 
 ## Note per parametro
 
 **`N_TENTATIVI_VERIFICA` + `TEMPO_LIMITE_VERIFICA`** — il conteggio include anche i tentativi
 **riusciti**, non solo quelli errati; il messaggio all'utente cita valori fissi «3 tentativi in 2h»
 anche se la configurazione cambia. Vedi [[Tentativo di verifica transazione]].
+
+**`COMANDI_BOT_ABILITATI`** — a `false` il bot smette di rispondere a **qualunque** cosa l'utente
+avvii: comandi testuali, bottoni, menu a tendina, finestre di inserimento. A ognuno risponde con il
+testo `bot.disabilitato` e non fa altro. Serve a fermare tutto durante una manutenzione senza
+spegnere il servizio.
+
+Restano attivi di proposito i fatti che **non sono comandi**: il censimento di chi entra nel server,
+la reazione al disclaimer, l'attribuzione dei referral, il [[Batch verifica abbonamenti]] e i
+webhook dei pagamenti già avviati. Fermarli significherebbe perdere utenti e incassi, non sospendere
+un servizio.
+
+**Gli amministratori sono esenti**, su tutte le superfici e non solo sul comando `!Admin`: quel
+comando apre un pannello fatto di bottoni e menu, che altrimenti si aprirebbe muto. Il ruolo viene
+verificato **solo a bot sospeso** — finché l'interruttore è acceso non parte alcuna chiamata a
+Discord.
+
+Per **riaccendere** il bot si modifica comunque questa riga a database: nessun comando del pannello
+admin scrive in `cfg_server`.
+
+Se la chiave manca si assume `true`: una configurazione persa non deve zittire il solo canale con
+cui gli utenti pagano e chiedono assistenza.
 
 **`LOG_CONSERVAZIONE_GIORNI`** — il batch delle 22:00 cancella le righe di `sys_log_server` più
 vecchie di tanti giorni. Il numero fa anche da interruttore: `0` conserva tutto, ed è il valore

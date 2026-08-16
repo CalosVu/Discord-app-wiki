@@ -5,7 +5,7 @@ alias: [menu Admin, pannello di controllo]
 tag: [dominio/bot, dominio/comandi, dominio/admin]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -91,6 +91,14 @@ fine. Vedi [[Reportistica]] per il significato dei numeri.
 Serve a vedere **esattamente** ciò che vede l'agente con `!mieiref`: gli embed sono costruiti dalla
 stessa funzione condivisa, così le due viste non possono divergere. Il percorso è
 agente → periodo (mese corrente o precedente) → due embed, Stripe in EUR e crypto in USD.
+
+## Restano attivi a bot sospeso
+
+`COMANDI_BOT_ABILITATI` a `false` zittisce il bot per tutti, ma **non per gli amministratori**:
+comandi, bottoni, menu e finestre continuano a funzionare per chi ha il ruolo. Serve a poter
+lavorare mentre il bot è chiuso agli utenti ([[Comandi utente]]).
+
+Per **riaccenderlo** si passa comunque dal database — vedi qui sotto.
 
 ## Cosa NON si può fare dal bot
 

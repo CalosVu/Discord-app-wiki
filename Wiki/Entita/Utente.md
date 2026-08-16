@@ -5,7 +5,7 @@ alias: [User, users, membro]
 tag: [dominio/utenti]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-15
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -59,7 +59,8 @@ come rete di sicurezza per chi era già membro del server prima di questo flusso
 | Campo | Colonna | Note |
 |---|---|---|
 | `discordId` | `discord_id` | chiave naturale, `UNIQUE`; usata come FK da mezzo schema |
-| `username` | `username` | nome Discord al momento del censimento; non viene risincronizzato |
+| `username` | `username` | l'**account** Discord (`user.getName()`, es. `ciccio`); scritto al censimento e non risincronizzato |
+| `nomeVisualizzato` | `nome_visualizzato` | il nome della **lista membri** (`member.getEffectiveName()`, es. `Spiderman`); si aggiorna da solo, vedi sotto |
 | `dataPrimaIscrizione` | `data_prima_iscrizione` | valorizzata al **primo** pagamento Supporter Member. Discrimina nuovo iscritto vs rinnovo ([[Blocco dei pagamenti]]) |
 | `dataScadenzaIscrizione` | `data_scadenza_iscrizione` | scadenza dell'abbonamento; `null` dopo il degrado |
 | `dataUltimaDonazione` | `data_ultima_donazione` | aggiornata da **entrambi** i tipi di pagamento |
@@ -71,6 +72,39 @@ come rete di sicurezza per chi era già membro del server prima di questo flusso
 | `ultimoPagamento` | `payment_id` | 1-a-1 con l'ultimo [[Pagamento]] Supporter Member |
 | `referral` | `referral_id` | il [[Referral agent]] con cui è entrato: base delle commissioni |
 | `pianoApplicato` | `piano_applicato_id` | riga del [[Catalogo servizi]] che determina prezzo e durata |
+
+## I due nomi, e perché servono entrambi
+
+Discord ne ha tre; a database ne teniamo due.
+
+| | Cosa contiene | Esempio | Quando cambia |
+|---|---|---|---|
+| `username` | l'**account** | `ciccio` | di rado |
+| `nome_visualizzato` | ciò che appare nella **lista membri** | `Spiderman` | quando vuole l'utente, o un admin |
+
+`getEffectiveName()` restituisce il nickname impostato sul server se c'è, altrimenti il display name
+globale, altrimenti l'username: è esattamente la stringa che si legge nella lista a destra.
+
+Il terzo — il display name globale da solo — non viene salvato: non serviva.
+
+### Come resta aggiornato
+
+Due meccanismi, perché nessuno dei due basta:
+
+1. **`NomeMembroListener`** intercetta `GuildMemberUpdateNicknameEvent` e riscrive la riga
+   nell'istante del cambio. Funziona grazie all'intent `GUILD_MEMBERS`, già attivo per l'ingresso
+   dei nuovi membri;
+2. **il [[Batch verifica abbonamenti]]** ricarica l'intera lista membri e riallinea tutto.
+
+Il secondo non è ridondante: gli eventi emessi mentre il bot è spento — un deploy, un riavvio —
+**Discord non li ripropone** alla riaccensione, e senza il giro notturno resterebbero persi per
+sempre. È anche ciò che popola le righe esistenti alla prima esecuzione, senza `UPDATE` manuali.
+
+Il riallineamento scrive **solo le righe cambiate**, e se Discord non risponde non tocca nulla:
+azzerare i nomi per una chiamata fallita sarebbe peggio del disallineamento.
+
+Chi ha lasciato il server **conserva l'ultimo nome noto**: non compare più fra i membri, quindi
+nessuno lo sovrascrive.
 
 ## Ciclo di vita dell'abbonamento
 
