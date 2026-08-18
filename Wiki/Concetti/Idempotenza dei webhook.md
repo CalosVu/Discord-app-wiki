@@ -42,6 +42,30 @@ dettaglio dei dati: i pagamenti crypto salvavano `stripe_session_id = ""` — st
 `NULL` — quindi un `UNIQUE` le avrebbe fatte collidere fra loro. La migration normalizza lo storico
 a `NULL` (che in MySQL può ripetersi) e il codice ora passa `null` per le crypto.
 
+### Il doppio accredito era già successo
+
+Applicando la `V31` la migration **è fallita**: in `pagamenti` c'erano già due righe per la stessa
+sessione Stripe.
+
+| | |
+|---|---|
+| Righe | `71` e `73`, stesso importo **49,00 €**, stesso utente |
+| Date | 2025-09-13 19:44 e 2025-09-14 **02:47**, sette ore dopo |
+| Effetto | un incasso contato due volte, abbonamento prolungato del doppio |
+
+Le sette ore escludono la corsa fra due retry concorrenti: è un retry tardivo di Stripe, arrivato
+quando **non esisteva ancora nessun controllo** — `existsByStripeSessionId` è del 2026-06-13, nove
+mesi dopo.
+
+Per bonificare: `utenti.payment_id` va prima spostato sulla riga da tenere (le chiavi esterne sono in
+`RESTRICT`, quindi una riga referenziata non si cancella), poi si rimuove l'eventuale commissione
+collegata e infine la riga spuria.
+
+> [!warning] Come NON leggere la query dei duplicati
+> Raggruppando su `stripe_session_id IS NOT NULL` compaiono anche **decine di righe crypto** che
+> condividono la stringa vuota `''`. **Non sono duplicati**: le normalizza a `NULL` il primo
+> statement della migration. Per isolare i duplicati veri serve `AND stripe_session_id <> ''`.
+
 ### Cosa succede quando il vincolo scatta
 
 L'ordine dentro `savePaymentAndUpdateUser` è la parte che conta: il pagamento si scrive **prima** di
