@@ -135,8 +135,32 @@ sudo -u ci-deploy touch /home/deploy/discord-bot/deployment/x   # la scrittura f
 | Porta applicativa | 8080, in ascolto su `127.0.0.1` |
 
 L'unit systemd: `EnvironmentFile` che carica il `.env`, `SPRING_PROFILES_ACTIVE=prod`,
-`-Xms512m -Xmx2g`, `Restart=always` con `RestartSec=10`, `NoNewPrivileges`, `PrivateTmp`, log
-rediretti su file.
+`-Xms512m -Xmx2g`, `Restart=always` con `RestartSec=10`, `NoNewPrivileges`, `PrivateTmp`,
+`UMask=0077`, stdout e stderr sul **journal**.
+
+### Chi scrive i log, e perché non più systemd sugli stessi file
+
+I file sotto `/opt/discord-bot/logs/` li scrive e li ruota **logback** (30 giorni, `totalSizeCap`
+1GB). Fino al 2026-08-19 l'unit systemd scriveva stdout e stderr **sugli stessi percorsi** con
+`append:`, e le due cose si ostacolavano: quando logback rinominava il file per la rotazione,
+systemd restava agganciato all'inode vecchio e continuava a scriverci — un file che nessuno ruotava
+più e cresceva senza limite.
+
+Ora i due flussi sono separati:
+
+```bash
+journalctl -u discord-bot -f          # avvio, crash, output non gestito (ruota systemd)
+tail -f /opt/discord-bot/logs/*.log   # log applicativi (ruota logback)
+```
+
+`UMask=0077` fa nascere quei file leggibili al solo utente del servizio: prima erano `0644`, e
+contengono username e ID Discord — quindi erano leggibili da chiunque avesse un account sul server,
+**`ci-deploy` compreso**, che esiste apposta per non poter leggere più del dovuto.
+
+> [!warning] Il file nel repository non è il servizio attivo
+> `deployment/discord-bot.service` è un modello. Dopo averlo modificato va copiato in
+> `/etc/systemd/system/` e serve `sudo systemctl daemon-reload`, altrimenti sul server continua a
+> girare la versione precedente.
 
 Il dominio è **`vutradingfarm.it`** dal 2026-07-24 (prima `inwestors.it`): l'app risponde su
 `discord.<dominio>`, VuTracker su `vutracker.<dominio>` ([[Runbook cambio dominio]]).
