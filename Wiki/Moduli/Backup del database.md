@@ -32,6 +32,33 @@ Il backup automatico del database MySQL, eseguito **dall'applicazione stessa** c
 La password non è passata come argomento `--password=...` (visibile a chiunque lanci `ps aux`) ma
 tramite la **variabile d'ambiente `MYSQL_PWD`** del processo figlio.
 
+## Il dump lo legge solo il proprietario
+
+Dal 2026-08-18 il file di backup nasce con permessi `rw-------` e la cartella `backups/` sta a
+`rwx------`. Prima li decideva la `umask` del sistema — tipicamente `0644` in una directory `0755` —
+e **qualunque utente con un account sul server leggeva l'intero database**: pagamenti, ID Discord,
+email dei clienti, hash delle transazioni.
+
+Il caso concreto è [[Deploy e CI-CD|ci-deploy]]: esiste apposta perché la chiave depositata nei
+secret di GitHub possa solo riavviare il bot, ma con i backup a `0644` si sarebbe scaricata il
+database dal dump della notte prima.
+
+L'ordine delle operazioni è la parte che conta: il file viene **creato prima** del redirect, già coi
+permessi giusti. `mysqldump` scrive su un file esistente senza toccarne i permessi, mentre se lo
+creasse lui varrebbe di nuovo la `umask`. La directory viene ristretta a ogni esecuzione, anche se
+esiste già, altrimenti i dump scritti in passato resterebbero esposti.
+
+Su Windows (sviluppo) l'operazione è un no-op — i permessi POSIX non esistono — e un errore non fa
+fallire il backup: meglio un dump con permessi larghi che nessun dump.
+
+> [!info] Cosa NON copre
+> `root` legge comunque tutto, e il file resta **in chiaro**: chi ottiene il disco o uno snapshot
+> Hetzner lo legge. I backup vivono inoltre **sullo stesso disco del database**, quindi non
+> proteggono dalla perdita della macchina. Sono scelte deliberate: il prodotto andrà su server di
+> clienti diversi, dove non esisterà nessun R2 su cui appoggiarsi, e una cifratura senza copia
+> esterna aggiungerebbe solo una chiave da custodire. **Al cliente va detto** che la copia esterna
+> è a suo carico.
+
 ## Configurazione
 
 Sotto `spring.datasource.backup` ([[Ambienti e profili Spring]]):
@@ -87,6 +114,11 @@ grep -vE "^(WARNING:|mysqldump:|ERROR)" backup.sql > backup_pulito.sql
 Dal fix in poi lo stderr va in un file `.log` affiancato al dump, e il `.sql` contiene solo SQL.
 Resta consigliato concedere il privilegio `PROCESS` all'utente MySQL del backup
 (`GRANT PROCESS ON *.* TO '<utente>'@'%';`): non serve ai dati, ma toglie l'errore dal log.
+
+Quel `.log` fino al 2026-08-18 **non veniva letto**: quando `mysqldump` falliva, l'applicazione
+stampava nei propri log i primi 500 caratteri del *file di dump* — cioè l'intestazione di
+`mysqldump`, che non dice nulla su cosa sia andato storto. Ora legge il file giusto, quindi il
+messaggio d'errore nel log applicativo è finalmente quello vero.
 
 ## Voci correlate
 - [[Batch verifica abbonamenti]]
