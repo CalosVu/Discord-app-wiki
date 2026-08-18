@@ -82,7 +82,7 @@ Punto di partenza consigliato: [[Panoramica]].
 - [[Variabili d'ambiente]] — inventario completo delle variabili lette dall'app.
 - [[Chiavi Stripe]] — le chiavi dei due account supporter e quelle per-relatore.
 - [[Credenziali R2]] — accesso al bucket privato dei video.
-- [[Ambienti e profili Spring]] — `dev`, `docker`, `prod` e le loro differenze.
+- [[Ambienti e profili Spring]] — `dev`, `prod` e le loro differenze.
 
 ## Interventi
 

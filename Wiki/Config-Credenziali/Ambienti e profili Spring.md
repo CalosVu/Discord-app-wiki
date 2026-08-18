@@ -11,22 +11,37 @@ stato: stabile
 
 # Ambienti e profili Spring
 
-I tre profili dell'applicazione e cosa cambia in ciascuno.
+I profili dell'applicazione e cosa cambia in ciascuno.
 
-Il profilo attivo viene da `SPRING_PROFILES_ACTIVE`, con default **`dev`**.
+Il profilo attivo viene da `SPRING_PROFILES_ACTIVE`, con default **`dev`**. In produzione lo impone
+il servizio systemd (`discord-bot.service:13`).
 
 ## Le differenze che contano
 
-| Aspetto | `dev` | `docker` | `prod` |
-|---|---|---|---|
-| `ddl-auto` | `validate` | `validate` | `validate` |
-| Indirizzo di ascolto | `0.0.0.0` | `0.0.0.0` | **`127.0.0.1`** |
-| Porta MySQL tipica | 3307 (Docker locale) | 3306 (rete Docker) | 3306 |
-| Swagger UI | attivo | attivo | **disabilitato** |
-| Actuator | tutto | tutto | solo `health`, `info` |
-| Pool Hikari | default | default | max 10, min idle 5 |
-| Shutdown | immediato | immediato | `graceful` |
-| Log Hibernate | `ERROR` | — | `WARN` |
+| Aspetto | `dev` | `prod` |
+|---|---|---|
+| `ddl-auto` | `validate` | `validate` |
+| Indirizzo di ascolto | `0.0.0.0` | **`127.0.0.1`** |
+| Porta MySQL tipica | 3307 (Docker locale) | 3306 |
+| Swagger UI | attivo | **disabilitato** |
+| Pool Hikari | default | max 10, min idle 5 |
+| Shutdown | immediato | `graceful` |
+| Log Hibernate | `ERROR` | `WARN` |
+
+> [!info] I profili sono due, non tre
+> `application-docker.yml` è stato **eliminato il 2026-08-18**. Non lo usava nessuno — nessun
+> compose avvia l'applicazione, non esiste un `Dockerfile`, e il servizio in produzione imposta
+> `prod` — e non avrebbe nemmeno funzionato: puntava a un database `tradingdb` che non esiste da
+> nessuna parte (ovunque è `discord_db`).
+>
+> Il motivo per cui è stato tolto invece che corretto: non sovrascriveva nulla, quindi ereditava da
+> `application.yml` log a livello `DEBUG`, **Swagger attivo** e ascolto su `0.0.0.0`. Un profilo che
+> nessuno usa ma che, se avviato per sbaglio, abbassa le difese. Se un domani servirà il deploy in
+> container si riscriverà insieme al `Dockerfile`.
+>
+> Le righe `spring.docker.compose.enabled: false` restano in `dev` e `prod`: servono a impedire che
+> lo starter `spring-boot-docker-compose`, ancora fra le dipendenze, avvii da sé un compose
+> all'avvio dell'applicazione.
 
 ## La conseguenza più importante: `validate` in tutti i profili
 
@@ -72,11 +87,11 @@ mvn -pl discord-access-api spring-boot:run -Dspring-boot.run.profiles=dev
 un pagamento di test toccherebbe dati reali. Per i test Stripe si usa la sandbox e la CLI
 ([[Guida Stripe CLI]]).
 
-## Il profilo `docker`
+## Che fine ha fatto Docker
 
-`application-docker.yml` esiste per l'esecuzione dell'app dentro un container, con il DB raggiungibile
-per nome di servizio sulla porta 3306. **In produzione non si usa**: l'app gira come servizio
-systemd sull'host e solo MySQL è containerizzato ([[Deploy e CI-CD]]).
+Sul server **solo MySQL è containerizzato**: l'applicazione gira come servizio systemd sull'host, a
+partire dal JAR depositato dalla pipeline ([[Deploy e CI-CD]]). Non è mai esistito un `Dockerfile`
+per l'applicazione, ed è il motivo per cui il profilo `docker` era rimasto un guscio vuoto.
 
 ## Voci correlate
 - [[Variabili d'ambiente]]

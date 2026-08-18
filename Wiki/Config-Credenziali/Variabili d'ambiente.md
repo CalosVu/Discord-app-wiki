@@ -73,7 +73,7 @@ Gli indirizzi dei contratti USDT/USDC e i decimali sono **fissi in `application.
 |---|---|
 | ~~`VUTRACKER_API_KEY`~~ | **non più usata** dal 2026-08-12: l'integrazione è stata rimossa ([[Integrazione VuTracker]]). Si può togliere dai `.env` |
 | `JWT_SECRET`, `JWT_EXPIRATION` | flusso JWT **non attivo**; da rigenerare con valore casuale se un giorno si attiva |
-| `SPRING_PROFILES_ACTIVE` | `dev` \| `docker` \| `prod` ([[Ambienti e profili Spring]]) |
+| `SPRING_PROFILES_ACTIVE` | `dev` \| `prod` ([[Ambienti e profili Spring]]). Il profilo `docker` non esiste più dal 2026-08-18 |
 
 ## Le cinque variabili che cambiano col dominio
 

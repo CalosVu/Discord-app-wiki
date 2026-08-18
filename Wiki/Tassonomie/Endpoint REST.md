@@ -27,12 +27,16 @@ l'interazione passa dal bot Discord, non dall'HTTP.
 | `GET` | `/payment/cancel` | il browser dell'utente | nessuna |
 | `GET` | `/swagger-ui.html`, `/api-docs` | sviluppatori | **disabilitati in `prod`** |
 
-> [!warning] Actuator non esiste
+> [!warning] Actuator non esiste: quegli endpoint rispondono 404
 > Questa tabella elencava `/actuator/health` e `/actuator/info` come «esposti solo questi due».
-> **Non è mai stato vero**: la dipendenza `spring-boot-starter-actuator` non è nel progetto, non c'è
-> alcuna property `management.*`, e quegli URL rispondono `404`. Verificato il 2026-08-18. Se un
-> giorno servisse il monitoraggio, la dipendenza va aggiunta — e allora sì che gli endpoint vanno
-> ristretti, perché di default ne espone più di due.
+> **Non è mai stato vero**: la dipendenza `spring-boot-starter-actuator` non è nel progetto, quindi
+> nessun endpoint `/actuator/**` viene mappato. Verificato il 2026-08-18.
+>
+> L'equivoco nasce da `application-prod.yml:50-58`, che *configura* actuator —
+> `management.endpoints.web.exposure.include: health,info` e `show-details: when-authorized` — pur
+> senza la dipendenza che lo fornisce. È **configurazione morta**: Spring la legge e la ignora.
+> Se un giorno servirà il monitoraggio basterà aggiungere la dipendenza, e quelle righe
+> torneranno a valere — motivo per cui vanno lasciate dove sono, non cancellate.
 
 ## Cosa mostra `/payment/success`
 
