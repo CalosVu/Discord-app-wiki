@@ -5,7 +5,7 @@ alias: [ruoli, SUPPORTER_MEMBER, GUEST, GOLD_SUPPORTER_MEMBER]
 tag: [dominio/accessi]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -16,16 +16,20 @@ utente vede. Il database registra lo stato, ma è l'assegnazione del ruolo a dar
 
 ## I quattro ruoli
 
-| Ruolo | Variabile d'ambiente | Chi lo assegna | Quando |
+| Ruolo | Chiave in `cfg_server` | Chi lo assegna | Quando |
 |---|---|---|---|
-| **GUEST** | `DISCORD_GUEST_ROLE` | `DisclaimerListener` | all'ingresso nel server, e di nuovo al degrado |
-| **SUPPORTER_MEMBER** | `DISCORD_SUPPORTER_MEMBER_ROLE` | flusso di pagamento | a ogni pagamento di abbonamento andato a buon fine |
-| **GOLD_SUPPORTER_MEMBER** | `DISCORD_GOLD_SUPPORTER_MEMBER_ROLE` | flusso di pagamento | a ogni [[Sostegno libero]] |
-| **ADMIN** | `DISCORD_ADMIN_ROLE` | manualmente sul server | mai toccato dall'app: è un **input**, non un output |
+| **GUEST** | `RUOLO_NEW_ENTRY` | `DisclaimerListener` | all'ingresso nel server, e di nuovo al degrado |
+| **SUPPORTER_MEMBER** | `RUOLO_ABBONATO` | flusso di pagamento | a ogni pagamento di abbonamento andato a buon fine |
+| **GOLD_SUPPORTER_MEMBER** | `RUOLO_DONAZIONE` | flusso di pagamento | a ogni [[Sostegno libero]] |
+| **ADMIN** | `RUOLO_ADMIN` | manualmente sul server | mai toccato dall'app: è un **input**, non un output |
 
-I nomi effettivi vivono in [[Variabili d'ambiente]]: il codice cerca il ruolo **per nome** sulla
-guild (`getRolesByName`), quindi rinominare un ruolo su Discord senza aggiornare la variabile rompe
-l'assegnazione in silenzio (viene solo loggato «Ruolo non trovato nel server»).
+I nomi effettivi vivono **solo** in [[Tabella cfg_server]]: le variabili d'ambiente
+`DISCORD_*_ROLE` sono state rimosse con `V29`, perché una seconda fonte poteva divergere da quella
+vera.
+
+Il codice cerca il ruolo **per nome** sulla guild (`getRolesByName`), quindi rinominare un ruolo su
+Discord senza aggiornare la riga rompe l'assegnazione in silenzio: viene solo loggato «Ruolo non
+trovato nel server».
 
 ## Le tre operazioni
 
@@ -43,7 +47,7 @@ ruolo** su Discord.
 ## Il ruolo ADMIN è la sola autorizzazione applicativa
 
 Non esiste una tabella di amministratori: `isAdmin(discordId)` interroga Discord in tempo reale e
-verifica che il membro abbia il ruolo il cui nome è in `DISCORD_ADMIN_ROLE`. Chi ha quel ruolo può
+verifica che il membro abbia il ruolo il cui nome è in `cfg_server.RUOLO_ADMIN`. Chi ha quel ruolo può
 usare tutti i [[Comandi admin]], registrare [[Prelievo|prelievi]] e leggere i report finanziari.
 
 Conseguenza operativa: **assegnare il ruolo admin su Discord dà accesso immediato** a tutte le

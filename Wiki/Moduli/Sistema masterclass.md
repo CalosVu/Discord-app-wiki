@@ -53,12 +53,36 @@ relatore**, perché ogni relatore ha un webhook secret diverso ([[Relatore]]).
 
 1. verifica della firma col secret di quel relatore;
 2. idempotenza su `stripe_session_id`;
-3. calcolo degli importi (quota server teorica, fee, netto) → [[Riconciliazione della fee Stripe]];
-4. salvataggio del [[Pagamento masterclass]] — se scatta il vincolo di doppio acquisto, **niente
+3. **il firmatario deve essere il proprietario della masterclass** (vedi sotto);
+4. **l'importo deve coprire il prezzo di listino** (vedi sotto);
+5. calcolo degli importi (quota server teorica, fee, netto) → [[Riconciliazione della fee Stripe]];
+6. salvataggio del [[Pagamento masterclass]] — se scatta il vincolo di doppio acquisto, **niente
    erogazione** e notifica agli admin che invita a valutare il rimborso;
-5. **erogazione**: presigned URL R2 di durata `MASTERCLASS_DURATA_LINK_ORE` (default 3h) e DM
+7. **erogazione**: presigned URL R2 di durata `MASTERCLASS_DURATA_LINK_ORE` (default 3h) e DM
    all'acquirente. Questo passo **non dipende dalla fee**;
-6. DM al relatore e notifica agli admin. Un errore qui viene loggato ma non blocca l'erogazione.
+8. DM al relatore e notifica agli admin. Un errore qui viene loggato ma non blocca l'erogazione.
+
+### I due controlli sull'evento
+
+Tutto ciò che identifica l'acquisto — masterclass, acquirente, importo — arriva dai **metadata del
+payload**, che il firmatario dell'evento controlla. La firma HMAC dice solo *chi* ha firmato, non
+*cosa*: senza questi due confronti un relatore potrebbe firmare col proprio secret un evento che
+punta a una masterclass altrui e farsi recapitare il video di un collega.
+
+**Firmatario = proprietario.** L'identità di chi firma si ricava dal `relatoreId` nel path (modello
+direct) o da `event.getAccount()` (Connect), e deve combaciare con `masterclass.relatore_id` — o con
+`relatori.stripe_account_id` su Connect. Se non è determinabile né l'una né l'altra, l'evento è
+respinto.
+
+**Importo ≥ prezzo.** `amount_total` viene confrontato con `masterclass.prezzo_eur`. Se è inferiore
+il pagamento **non viene registrato e il video non viene erogato**: gli admin ricevono una notifica
+con acquirente, masterclass, relatore, importo ricevuto, prezzo previsto e session id, e il compito
+di **contattare l'utente** — potrebbe aver pagato per davvero e andare rimborsato. Un importo
+*superiore* passa: capita abbassando il prezzo mentre una sessione di checkout è già aperta (durano
+2 ore).
+
+In entrambi i casi il rifiuto è definitivo: Stripe ritenta, ma il risultato non cambia. Il recupero
+è manuale.
 
 ## Il modello Connect, per confronto
 

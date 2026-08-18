@@ -5,7 +5,7 @@ alias: [.env, env, variabili]
 tag: [dominio/configurazione]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -32,12 +32,17 @@ Inventario **completo** delle variabili lette dall'applicazione, ricavato da `ap
 | `DISCORD_BOT_TOKEN` | token del bot. Rotazione: rigenerare nel Developer Portal e riavviare |
 | `DISCORD_GUILD_ID` | id del server |
 | `DISCORD_DISCLAIMER_CHANNEL` | id del canale del disclaimer |
-| `DISCORD_SUPPORTER_MEMBER_ROLE` | **nome** del ruolo, non l'id → [[Ruoli Discord]] |
-| `DISCORD_GOLD_SUPPORTER_MEMBER_ROLE` | idem |
-| `DISCORD_GUEST_ROLE` | idem |
-| `DISCORD_ADMIN_ROLE` | idem — determina chi può usare i [[Comandi admin]] |
 | `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | OAuth2. Flusso **non attivo** ([[Sicurezza e autenticazione]]) |
 | `DISCORD_REDIRECT_URI` | **cambia col dominio**; deve essere byte-identico al Developer Portal |
+
+> [!warning] Rimosse con `V29`: i nomi dei ruoli
+> `DISCORD_SUPPORTER_MEMBER_ROLE`, `DISCORD_GOLD_SUPPORTER_MEMBER_ROLE`, `DISCORD_GUEST_ROLE`,
+> `DISCORD_ADMIN_ROLE` **non le legge più nessuno**: i nomi dei ruoli vivono solo in `cfg_server`
+> ([[Tabella cfg_server]]). Si possono togliere dal `.env` di ogni ambiente.
+>
+> Erano una seconda fonte usata come ripiego e per ricreare una riga cancellata. Con il vincolo che
+> impedisce la cancellazione e l'avvio che fallisce se una chiave manca, servivano solo a poter
+> divergere dal valore vero.
 
 ## Stripe
 

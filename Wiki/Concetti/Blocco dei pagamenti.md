@@ -5,7 +5,7 @@ alias: [flag pagamenti, pagamenti sospesi]
 tag: [dominio/pagamenti, dominio/configurazione]
 fonti: [Codice Discord-access-app, Piano sviluppo doppio Stripe]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -22,7 +22,9 @@ incasso, senza deploy e senza riavvio.
 | `PAGAMENTI_RINNOVI_ABILITATI` | i **rinnovi** Supporter Member | `dataPrimaIscrizione != null` |
 | `DONAZIONI_LIBERE_ABILITATE` | il [[Sostegno libero]] | — |
 
-Default nel codice: **`true`**. Quindi una riga mancante **non blocca**: apre.
+Le tre righe sono **obbligatorie**: non si cancellano e l'applicazione non parte se mancano
+([[Tabella cfg_server]]). Fino ad agosto 2026 il codice ripiegava su `true`, quindi una riga mancante
+apriva i pagamenti in silenzio — ora quel caso non esiste.
 
 ## Cross-canale per scelta
 

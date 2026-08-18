@@ -16,33 +16,43 @@ senza deploy né riavvio. Per il funzionamento del meccanismo vedi [[Configurazi
 
 ## I parametri
 
-| id | `nome_configurazione` | Valore iniziale | Default nel codice | Chi lo legge | Effetto |
-|---|---|---|---|---|---|
-| 1 | `N_TENTATIVI_VERIFICA` | `3` | `3` | `CryptoPaymentService` | numero massimo di tentativi di verifica crypto nella finestra |
-| 2 | `TEMPO_LIMITE_VERIFICA` | `2` | `2` | `CryptoPaymentService` | ampiezza della finestra, in **ore** |
-| — | `COMANDI_BOT_ABILITATI` | `true` | `true` | `ComandiBotService` | interruttore generale delle interazioni col bot |
-| — | `LOG_CONSERVAZIONE_GIORNI` | `365` | `0` | `VerificaAbbonamentiBatch` | giorni di conservazione del [[Log operativo]]. `0` conserva tutto |
-| — | `PIONIERI_ABILITATI` | `true` | `false` | `PianoUtenteService` | interruttore del meccanismo. A `false` tutti pagano `BASIC` |
-| 3 | `PIONIERI` | `50` | `0` | `PianoUtenteService` | tetto dei posti pioniere. Default 0: se la chiave manca non nascono pionieri per sbaglio |
-| — | `PIONIERI_ASSEGNATI` | quelli esistenti | `0` | `PianoUtenteService` | posti già consumati. **Non si decrementa mai** |
-| 4 | `N_GIORNI_DOPO_SCADENZA` | `3` | `3` | `VerificaAbbonamentiBatch` | giorni di tolleranza dopo la scadenza prima del degrado |
-| 5 | `N_ORE_DURATA_LINK_STRIPE` | `5` | `5` | `StripePaymentService` | validità del link di checkout per le donazioni, in ore |
-| 6 | `MASTERCLASS_DURATA_LINK_ORE` | `3` | `3` | `MasterclassPaymentNotificationService` | validità del presigned URL R2 della masterclass, in ore |
-| 7 | `PAGAMENTI_NUOVE_ISCRIZIONI_ABILITATE` | `true` | `true` | `PagamentiAbilitazioneService` | abilita il **primo** Supporter Member |
-| 8 | `PAGAMENTI_RINNOVI_ABILITATI` | `true` | `true` | `PagamentiAbilitazioneService` | abilita i **rinnovi** Supporter Member |
-| 9 | `DONAZIONI_LIBERE_ABILITATE` | `true` | `true` | `PagamentiAbilitazioneService` | abilita il [[Sostegno libero]] |
-| — | `BATCH_VERIFICA_ABBONAMENTI` | `true` | `true` | `VerificaAbbonamentiBatch` | `false` = niente promemoria di rinnovo, scadenze, degradi di ruolo |
-| — | `BACKUP_DB_ABILITATO` | `true` | `true` | `VerificaAbbonamentiBatch` | `false` = niente backup del database alle 22:00 |
-| — | `RUOLO_ABBONATO` | `SUPPORTER_MEMBER` | `DISCORD_SUPPORTER_MEMBER_ROLE` | `RuoliDiscordService` | ruolo di chi ha un abbonamento attivo |
-| — | `RUOLO_DONAZIONE` | `GOLD_SUPPORTER_MEMBER` | `DISCORD_GOLD_SUPPORTER_MEMBER_ROLE` | `RuoliDiscordService` | ruolo di chi dona senza nulla in cambio |
-| — | `RUOLO_NEW_ENTRY` | `GUEST` | `DISCORD_GUEST_ROLE` | `RuoliDiscordService` | ruolo di chi entra nel server |
-| — | `RUOLO_ADMIN` | `ADMIN` | `DISCORD_ADMIN_ROLE` | `RuoliDiscordService` | ruolo degli amministratori |
-| — | `RUOLO_MODERATORE` | `MODERATORE` | — | ⚠️ **nessuno** | predisposto, nessuna funzionalità lo legge |
-| — | `PERCENTUALE_STRIPE_SECONDARIO` | `30` | `50` | `StripeAccountSelector` | quota di incassi Stripe da tenere sull'account secondario |
+Sono **tutte obbligatorie**: elencate in `cfg_server_obbligatorie`, non cancellabili, verificate
+all'avvio. La colonna «Tipo» è quella dichiarata lì, e un valore che non la rispetta **blocca il
+boot**.
 
-I valori nella colonna «Valore iniziale» sono quelli della migration `V2`, tranne l'ultimo che
-arriva da `V7`. In produzione possono essere diversi: `V2` è marcata come baseline e non viene
-eseguita.
+| `nome_configurazione` | Valore | Tipo | Chi lo legge | Effetto |
+|---|---|---|---|---|
+| `N_TENTATIVI_VERIFICA` | `3` | INTERO | `CryptoPaymentService` | tentativi di verifica crypto nella finestra |
+| `TEMPO_LIMITE_VERIFICA` | `2` | INTERO | `CryptoPaymentService` | ampiezza della finestra dei tentativi, in **ore** |
+| `VERIFICA_CRYPTO_FINESTRA_ORE` | `24` | INTERO | `CryptoPaymentService` | ore entro cui una transazione è verificabile. `0` disattiva |
+| `COMANDI_BOT_ABILITATI` | `true` | BOOLEANO | `ComandiBotService` | interruttore generale delle interazioni col bot |
+| `LOG_CONSERVAZIONE_GIORNI` | `365` | INTERO | `VerificaAbbonamentiBatch` | conservazione del [[Log operativo]]. `0` conserva tutto |
+| `PIONIERI_ABILITATI` | `true` | BOOLEANO | `PianoUtenteService` | a `false` tutti pagano `BASIC` |
+| `PIONIERI` | `50` | INTERO | `PianoUtenteService` | tetto dei posti pioniere. `0` = nessun pioniere, mai |
+| `PIONIERI_ASSEGNATI` | quelli esistenti | INTERO | `PianoUtenteService` | posti consumati. **Non si decrementa mai** |
+| `N_GIORNI_DOPO_SCADENZA` | `3` | INTERO | `VerificaAbbonamentiBatch` | tolleranza dopo la scadenza prima del degrado |
+| `N_ORE_DURATA_LINK_STRIPE` | `5` | INTERO | `StripePaymentService` | validità del link di checkout delle donazioni |
+| `MASTERCLASS_DURATA_LINK_ORE` | `3` | INTERO | `MasterclassPaymentNotificationService` | validità del presigned URL R2 |
+| `PAGAMENTI_NUOVE_ISCRIZIONI_ABILITATE` | `true` | BOOLEANO | `PagamentiAbilitazioneService` | abilita il **primo** Supporter Member |
+| `PAGAMENTI_RINNOVI_ABILITATI` | `true` | BOOLEANO | `PagamentiAbilitazioneService` | abilita i **rinnovi** |
+| `DONAZIONI_LIBERE_ABILITATE` | `true` | BOOLEANO | `PagamentiAbilitazioneService` | abilita il [[Sostegno libero]] |
+| `BATCH_VERIFICA_ABBONAMENTI` | `true` | BOOLEANO | `VerificaAbbonamentiBatch` | promemoria, scadenze, degradi di ruolo |
+| `BACKUP_DB_ABILITATO` | `true` | BOOLEANO | `VerificaAbbonamentiBatch` | backup del database alle 22:00 |
+| `PERCENTUALE_STRIPE_SECONDARIO` | `30` | INTERO | `StripeAccountSelector` | quota di incassi sull'account secondario |
+| `RUOLO_ABBONATO` | `SUPPORTER_MEMBER` | TESTO | `RuoliDiscordService` | ruolo di chi ha un abbonamento attivo |
+| `RUOLO_DONAZIONE` | `GOLD_SUPPORTER_MEMBER` | TESTO | `RuoliDiscordService` | ruolo di chi dona senza nulla in cambio |
+| `RUOLO_NEW_ENTRY` | `GUEST` | TESTO | `RuoliDiscordService` | ruolo di chi entra nel server |
+| `RUOLO_ADMIN` | `ADMIN` | TESTO | `RuoliDiscordService` | ruolo degli amministratori |
+| `RUOLO_MODERATORE` | `MODERATORE` | TESTO | ⚠️ **nessuno** | predisposto, nessuna funzionalità lo legge |
+
+Più le tre annotazioni `[VU] Wallet …`, che **non** sono configurazione: vedi in fondo.
+
+I valori in colonna sono quelli delle migration. In produzione possono essere diversi: `V2` è marcata
+come baseline e non viene eseguita.
+
+> **Non esistono più valori di ripiego nel codice.** `getConfigurationValue` non accetta un default e
+> solleva se la chiave manca: la tabella «Default nel codice» che stava qui è stata rimossa perché
+> quei valori non ci sono più.
 
 **`BATCH_VERIFICA_ABBONAMENTI` + `BACKUP_DB_ABILITATO`** governano il batch delle 22:00, il cui
 cron `0 0 22 * * *` è fisso nel codice: prima di `V7` l'unico modo di fermarlo era spegnere
@@ -51,10 +61,14 @@ dati e deve poter continuare anche quando si ferma la gestione degli abbonamenti
 
 | `BACKUP_DB_ABILITATO` | `BATCH_VERIFICA_ABBONAMENTI` | Alle 22:00 |
 |---|---|---|
-| `false` | `false` | nulla, il metodo esce subito |
-| `true` | `false` | solo il backup del database |
-| `false` | `true` | solo rinnovi, scadenze e degradi di ruolo |
-| `true` | `true` | backup, poi rinnovi, scadenze e degradi |
+| `false` | `false` | solo pulizia del log e riallineamento dei nomi |
+| `true` | `false` | backup, pulizia del log, riallineamento dei nomi |
+| `false` | `true` | pulizia, nomi, poi rinnovi, scadenze e degradi |
+| `true` | `true` | tutto |
+
+Pulizia del log e riallineamento dei nomi **non dipendono da questi due flag**: hanno i propri
+criteri (`LOG_CONSERVAZIONE_GIORNI` e la lista membri di Discord), quindi il batch non esce mai
+subito del tutto. Vedi [[Batch verifica abbonamenti]].
 
 Serve soprattutto negli ambienti di collaudo che girano su una copia dei dati di produzione, dove
 il batch degraderebbe ruoli e azzererebbe le date di scadenza su utenti veri.
@@ -73,18 +87,19 @@ descrive la **funzione**, il valore è il **nome** che quel ruolo ha su quel ser
 Il codice chiede `ruoloAbbonato()` e non sa come si chiami: nessun nome di ruolo compare nei
 sorgenti. Portare il prodotto su un altro server significa cambiare questi cinque valori.
 
-Le righe sono inserite da `V8` e devono esistere sempre; se una viene cancellata,
-`RuoliDiscordService` la ricrea all'avvio con il valore della variabile d'ambiente. Le
-`DISCORD_*_ROLE` restano solo come rete di sicurezza: la tabella è la fonte di verità.
+Le righe sono inserite da `V8` e la tabella è **l'unica fonte**.
 
-I valori di fabbrica sono per definizione un'ipotesi, perciò `RuoliDiscordService` confronta le due
-fonti a ogni avvio e segnala le differenze:
-
-```
-WARN  Ruolo RUOLO_SUPPORTER_MEMBER: a database vale 'SUPPORTER_MEMBER' ma l'ambiente
-      dichiara 'Supporter'. Vale il valore a database: se non è quello giusto il bot
-      non troverà il ruolo su Discord.
-```
+> [!warning] Le variabili `DISCORD_*_ROLE` non esistono più
+> Fino ad agosto 2026 c'era una seconda fonte: quattro variabili d'ambiente usate come ripiego, e
+> `RuoliDiscordService` ricreava da quelle una riga cancellata, confrontando le due fonti a ogni
+> avvio per segnalare le divergenze.
+>
+> Rimosse con `V29`: risolvevano un problema che non esiste più — ora la riga **non si può
+> cancellare** e l'avvio fallisce se manca. Due fonti potevano soprattutto **divergere**, ed era
+> proprio per questo che serviva il confronto all'avvio.
+>
+> `DISCORD_SUPPORTER_MEMBER_ROLE`, `DISCORD_GOLD_SUPPORTER_MEMBER_ROLE`, `DISCORD_GUEST_ROLE` e
+> `DISCORD_ADMIN_ROLE` si possono togliere dal `.env`: non le legge più nessuno.
 
 Il disallineamento si vede così all'avvio, non quando un utente resta senza ruolo dopo aver pagato.
 Il servizio **non corregge** da sé: sovrascrivere cancellerebbe una personalizzazione voluta.
@@ -92,6 +107,85 @@ Il servizio **non corregge** da sé: sovrascrivere cancellerebbe una personalizz
 ⚠️ Modificare una di queste chiavi **non rinomina il ruolo su Discord**: dice al bot con quale nome
 cercarlo. Se il nome non corrisponde a un ruolo esistente sul server, l'assegnazione fallisce con
 «Ruolo … non trovato nel server» nei log.
+
+## 🔒 Le configurazioni obbligatorie non si cancellano, e senza di esse l'app non parte
+
+Da `V29` valgono due regole insieme:
+
+1. **`cfg_server_obbligatorie`** elenca le chiavi che il codice legge. Una chiave esterna con
+   `ON DELETE RESTRICT` verso `cfg_server` fa **rifiutare da MySQL** la cancellazione della riga
+   corrispondente — per qualunque utente, **root compreso**;
+2. **`ConfigurazioneObbligatoria`** verifica all'avvio che ogni chiave elencata esista e contenga un
+   valore del tipo dichiarato. Se manca qualcosa, **l'applicazione non parte**.
+
+I valori di ripiego nel codice sono stati **rimossi**: `getConfigurationValue` non accetta più un
+terzo parametro e solleva se la chiave manca.
+
+### Perché non basta dire «non cancellare»
+
+L'applicazione non si romperebbe: con i vecchi ripieghi partiva comunque. Il problema è che **il
+ripiego non coincideva con il valore desiderato**, e in due casi spegneva una protezione:
+
+| Chiave cancellata | Vecchio ripiego | Conseguenza silenziosa |
+|---|---|---|
+| `VERIFICA_CRYPTO_FINESTRA_ORE` | `0` | il controllo temporale sulle transazioni crypto **si spegneva** ([[Pagamenti crypto Arbitrum]]) |
+| `PIONIERI_ABILITATI` | `false` | sistema pionieri spento, tutti al prezzo pieno |
+| `PIONIERI` | `0` | nessun posto pioniere disponibile |
+| `PERCENTUALE_STRIPE_SECONDARIO` | `50` | ripartizione fra i due account diversa |
+
+Nessun errore, nessun log: solo un comportamento diverso da quello atteso. È il caso peggiore, perché
+non se ne accorge nessuno.
+
+> **Per disattivare una funzione si usa il suo valore** (`false`, `0`), **non il `DELETE`.** Ogni
+> interruttore è progettato per questo.
+
+### La tabella è anche l'inventario
+
+`cfg_server_obbligatorie` contiene nome, **tipo** (`INTERO`, `BOOLEANO`, `TESTO`) e una nota, ed è la
+**sola fonte**: il codice legge l'elenco da lì invece di tenerne una copia in Java. Con due elenchi
+separati, aggiungere una chiave in un posto e dimenticarla nell'altro avrebbe prodotto una
+configurazione obbligatoria ma cancellabile, o viceversa.
+
+Ne segue che **per rendere obbligatoria una configurazione basta una migration**, senza toccare
+codice.
+
+### Come si aggiunge una riga
+
+L'ordine conta: la chiave esterna va **da `cfg_server_obbligatorie` verso `cfg_server`**, quindi la
+riga «figlia» non può precedere la «padre».
+
+```sql
+-- Configurazione dell'applicazione (obbligatoria):
+INSERT INTO cfg_server (nome_configurazione, valore_configurazione, descrizione)
+VALUES ('NUOVA_CHIAVE', '10', 'a cosa serve');                        -- 1° la padre
+
+INSERT INTO cfg_server_obbligatorie (nome_configurazione, tipo, note)
+VALUES ('NUOVA_CHIAVE', 'INTERO', 'nota per chi legge');              -- 2° la figlia
+
+-- Annotazione operativa (cancellabile): solo la prima riga, con prefisso [VU]
+INSERT INTO cfg_server (nome_configurazione, valore_configurazione, descrizione)
+VALUES ('[VU] Qualcosa', 'valore', 'appunto');
+```
+
+⚠️ **Se il codice legge una chiave che non è fra le obbligatorie**, la verifica d'avvio non la
+controlla e l'errore si manifesta a runtime, nel momento in cui serve.
+
+### Il prefisso `[VU]` è una convenzione, non un meccanismo
+
+Verificato sul database: una riga **senza** `[VU]` e non elencata fra le obbligatorie **si cancella
+senza problemi**. L'unica cosa che impedisce il `DELETE` è la presenza in `cfg_server_obbligatorie`.
+
+Il prefisso serve alla lettura: aprendo `cfg_server` distingui a occhio le tue annotazioni dalla
+configurazione dell'applicazione, senza incrociare l'altra tabella.
+
+### Perché una chiave esterna e non un trigger
+
+Il primo tentativo era un trigger `BEFORE DELETE`. **MySQL lo rifiuta** con l'errore `1419` quando il
+binary logging è attivo e l'utente non ha il privilegio `SUPER` — il caso sia in locale sia in
+produzione, e concedere `SUPER` all'utente applicativo sarebbe peggio del problema che risolve.
+
+La chiave esterna ottiene lo stesso risultato senza privilegi speciali. Lezione che vale oltre questo
+caso: **i trigger MySQL non sono creabili con i privilegi ordinari** quando il binlog è attivo.
 
 ## Le tre righe che nessuno legge
 
@@ -130,13 +224,18 @@ Discord.
 Per **riaccendere** il bot si modifica comunque questa riga a database: nessun comando del pannello
 admin scrive in `cfg_server`.
 
-Se la chiave manca si assume `true`: una configurazione persa non deve zittire il solo canale con
-cui gli utenti pagano e chiedono assistenza.
+**`VERIFICA_CRYPTO_FINESTRA_ORE`** — una transazione crypto è verificabile solo entro tante ore dal
+blocco che la contiene. È **l'unica difesa** contro il riscatto di trasferimenti storici verso il
+wallet del progetto, dato che il mittente on-chain non è verificabile per chi paga da un exchange
+([[Pagamenti crypto Arbitrum]]).
+
+Il valore `24` non è arbitrario: sugli 82 pagamenti reali il 92,7% viene verificato entro 30 minuti,
+ma 3 su 82 sono arrivati dopo 2h30. `0` disattiva il controllo — ed essendo la chiave obbligatoria,
+uno zero lì significa che **qualcuno l'ha scelto**, non che manca una riga.
 
 **`LOG_CONSERVAZIONE_GIORNI`** — il batch delle 22:00 cancella le righe di `sys_log_server` più
-vecchie di tanti giorni. Il numero fa anche da interruttore: `0` conserva tutto, ed è il valore
-assunto anche se la chiave manca o non contiene un numero — nessun log deve sparire per una
-configurazione sbagliata. La pulizia avviene **dopo** il backup ([[Log operativo]]).
+vecchie di tanti giorni. Il numero fa anche da interruttore: `0` conserva tutto. La pulizia avviene
+**dopo** il backup ([[Log operativo]]).
 
 **`PIONIERI_ABILITATI`** — spegne l'intero meccanismo dei [[Membri pionieri]]: tutti gli utenti
 tornano allo stesso livello e pagano `BASIC`, promo comprese. Nulla viene perso, è reversibile.

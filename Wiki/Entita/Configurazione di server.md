@@ -5,7 +5,7 @@ alias: [server_config, ServerConfig, parametro runtime]
 tag: [dominio/configurazione]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -29,18 +29,26 @@ Tre colonne significative, chiave/valore in forma testuale:
 
 ## Come si legge
 
-Unico punto di accesso, `LoadConfigurationService.getConfigurationValue`, con tre argomenti: nome,
-funzione di conversione, valore di default.
+Unico punto di accesso, `LoadConfigurationService.getConfigurationValue`, con due argomenti: nome e
+funzione di conversione.
 
 ```java
 int ore = loadConfigurationService.getConfigurationValue(
-        "MASTERCLASS_DURATA_LINK_ORE", Integer::parseInt, 3);
+        "MASTERCLASS_DURATA_LINK_ORE", Integer::parseInt);
 ```
 
-Il valore di default nel codice è **l'ultima rete di sicurezza**: se la riga manca nel DB
-l'applicazione continua a funzionare. Ne segue una proprietà importante: **una riga assente non
-disabilita nulla**, applica il default. Per i flag booleani il default è `true`, quindi cancellare
-la riga **riapre** i pagamenti anziché chiuderli ([[Blocco dei pagamenti]]).
+**Non esiste un valore di ripiego.** Se la chiave manca, il metodo solleva — ma in pratica non ci si
+arriva: `ConfigurazioneObbligatoria` verifica tutte le chiavi all'avvio e fa **fallire il boot** se
+ne manca una, e una chiave esterna ne impedisce la cancellazione ([[Tabella cfg_server]]).
+
+> [!warning] Come funzionava prima, e perché è stato cambiato
+> Fino ad agosto 2026 il metodo accettava un terzo parametro con il valore da usare in assenza della
+> riga. Sembrava prudente, ma produceva il caso peggiore: l'applicazione partiva e si comportava
+> **diversamente** da come era configurata, senza errore né log.
+>
+> Sui flag booleani il ripiego era `true`, quindi cancellare una riga **riapriva** i pagamenti
+> anziché chiuderli. E su `VERIFICA_CRYPTO_FINESTRA_ORE` il ripiego `0` **spegneva** il controllo
+> temporale sulle transazioni crypto — cioè una protezione, in silenzio.
 
 ## Nessuna cache
 
@@ -48,12 +56,14 @@ Ogni lettura è una query. I cambi di valore hanno effetto **immediato** sull'op
 senza riavvio: è il pregio principale del meccanismo. Il costo è una query per ogni lettura, che a
 questi volumi è irrilevante.
 
-## ⚠️ Chiave non unica
+## La chiave è unica
 
-Senza vincolo `UNIQUE` su `nome_configurazione`, un doppio inserimento della stessa chiave non dà
-errore: `findByNomeConfigurazione` restituisce un `Optional` e Spring Data solleva un'eccezione se
-i risultati sono più di uno. Prima di un `INSERT` in produzione conviene sempre verificare che la
-chiave non esista già.
+`nome_configurazione` ha il vincolo `UNIQUE` da `V4`: un doppio inserimento viene rifiutato dal
+database. Serve, perché `findByNomeConfigurazione` restituisce un `Optional` e con due righe Spring
+Data solleverebbe un'eccezione sulla dimensione del risultato.
+
+È anche il presupposto della chiave esterna di `cfg_server_obbligatorie`, che referenzia proprio
+questa colonna: senza unicità non sarebbe stata possibile ([[Tabella cfg_server]]).
 
 ## Voci correlate
 - [[Tabella cfg_server]]

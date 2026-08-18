@@ -5,7 +5,7 @@ alias: [elenchi codificati]
 tag: [dominio/tassonomie]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -16,11 +16,11 @@ Sono le pagine da consultare quando serve **il valore esatto** di qualcosa.
 
 ## Contenuto
 
-- [[Tabella cfg_server]] — tutti i parametri di configurazione runtime, con valore attuale,
-  default nel codice e chi li legge.
-- [[Enum di dominio]] — i cinque enum Java, con l'indicazione di quali valori sono realmente usati.
+- [[Tabella cfg_server]] — tutti i parametri di configurazione runtime, con valore attuale, tipo
+  atteso e chi li legge.
+- [[Enum di dominio]] — gli enum Java, con l'indicazione di quali valori sono realmente usati.
 - [[Endpoint REST]] — la superficie HTTP completa, con la protezione di ciascun percorso.
-- [[Schema del database]] — le 13 tabelle, le relazioni, i vincoli e le regole di migrazione.
+- [[Schema del database]] — le tabelle, le relazioni, i vincoli e le regole di migrazione.
 
 ## Perché sono separate dai Concetti
 

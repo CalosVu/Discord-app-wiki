@@ -5,7 +5,7 @@ alias: [database, tabelle, DDL, migrazioni]
 tag: [dominio/database]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-16
+aggiornato: 2026-08-17
 stato: stabile
 ---
 
@@ -17,7 +17,7 @@ rompere la produzione.
 Database: `discord_db`. Schema e dati sono versionati con **Flyway** in
 `discord-access-persistence/src/main/resources/db/migration/`.
 
-## Le diciotto tabelle
+## Le tabelle
 
 Dal 2026-08-13 il nome è `<dominio>_<cosa>`, in italiano: le tabelle di uno stesso ambito stanno
 vicine in ordine alfabetico, e non convivono più due lingue (`users` accanto a `utenti_lifetime`,
@@ -27,6 +27,7 @@ vicine in ordine alfabetico, e non convivono più due lingue (`users` accanto a 
 |---|---|---|---|
 | `cfg_server` | `server_config` | `ServerConfig` | [[Configurazione di server]] |
 | `cfg_testi` | `text_config` | `TextConfig` | [[Tabella cfg_server]] |
+| `cfg_server_obbligatorie` | — | `ConfigObbligatoria` | [[Tabella cfg_server]] |
 | `cfg_piani` | `catalogo_servizi` → `cfg_catalogo_servizi` | `Piano` | [[Catalogo servizi]] |
 | `cfg_promo` | *(era nella stessa tabella dei piani)* | `Promo` | [[Promozioni temporali]] |
 | `utenti` | `users` | `User` | [[Utente]] |
@@ -61,6 +62,8 @@ richiesto di ricrearli uno per uno.
 ## Le relazioni portanti
 
 ```
+cfg_server ───── cfg_server_obbligatorie   (FK ON DELETE RESTRICT: le config non si cancellano)
+
 referral_utenti ─┬──< utenti >──── cfg_piani              (piano_applicato_id)
                  │       │  │
                  │       │  └──── utenti_disclaimer       (1-a-1)
@@ -101,6 +104,28 @@ registrabile un evento solo per chi aveva accettato il disclaimer ([[Log operati
 | `V17__commissioni_importo_congelato.sql` | `referral_commissioni.importo_commissione`: l'importo non viene più ricalcolato a ogni lettura |
 | `V18__masterclass_audit.sql` | `masterclass.data_creazione` → `data_update` |
 | `V19__masterclass_relatori_audit.sql` | `masterclass_relatori.data_inserimento` → `data_update`; commento su `stripe_account_id` |
+| `V20__masterclass_pagamenti_audit.sql` | `masterclass_pagamenti.created_at` → `data_update` |
+| `V21__pionieri_a_numero_chiuso.sql` | `utenti.pioniere_storico`, `PIONIERI_ASSEGNATI`, `PIONIERI_ABILITATI` ([[Membri pionieri]]) |
+| `V22__promo_destinatari.sql` | `destinatari` come `ENUM` a tre valori al posto di un flag |
+| `V23__piani_e_promo_separati.sql` | `cfg_catalogo_servizi` divisa in `cfg_piani` e `cfg_promo`; FK di `utenti` sui soli piani |
+| `V24__cfg_testi_pulizia.sql` | `data_modifica` → `data_update`; via il testo `accesso.revocato`, irraggiungibile |
+| `V25__conservazione_log.sql` | `LOG_CONSERVAZIONE_GIORNI` ([[Log operativo]]) |
+| `V26__interruttore_comandi_bot.sql` | `COMANDI_BOT_ABILITATI` + testo `bot.disabilitato` |
+| `V27__utenti_nome_visualizzato.sql` | `utenti.nome_visualizzato`, il nome della lista membri ([[Utente]]) |
+| `V28__finestra_verifica_crypto.sql` | `VERIFICA_CRYPTO_FINESTRA_ORE`: chiude il riscatto di transazioni storiche ([[Pagamenti crypto Arbitrum]]) |
+| `V29__cfg_server_protetta_da_delete.sql` | `cfg_server_obbligatorie`: la FK impedisce di cancellare le configurazioni, e ne dichiara i tipi |
+| `V30__email_cliente_fuori_da_transaction_hash.sql` | `pagamenti.email_cliente`: l'email esce dall'hash sintetico e prende una colonna indicizzata ([[Pagamento]]) |
+
+> [!warning] `V29` insegna una cosa su MySQL
+> Il primo tentativo usava un trigger `BEFORE DELETE`. MySQL lo **rifiuta** con l'errore `1419` se il
+> binary logging è attivo e l'utente non ha `SUPER` — quindi sia in locale sia in produzione.
+>
+> Peggio: la migration era già passata oltre l'`UPDATE` iniziale quando il `CREATE TRIGGER` è
+> fallito, lasciando il database a metà e Flyway con una migration marcata come fallita, che blocca
+> ogni avvio successivo. È servito rimuovere quella riga da `flyway_schema_history` a mano.
+>
+> **Regola che ne deriva: niente trigger nelle migration.** Per i vincoli si usano chiavi esterne, che
+> non richiedono privilegi speciali e valgono per tutti gli utenti, root compreso.
 
 ### Colonne vuote che NON sono residui
 
