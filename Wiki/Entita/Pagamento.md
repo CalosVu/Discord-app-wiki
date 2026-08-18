@@ -26,7 +26,7 @@ Non include gli acquisti di masterclass, che vivono su una tabella separata
 | `emailCliente` | `email_cliente` | email dell'account Stripe che ha pagato, per il riconoscimento da parte degli admin. `NULL` in crypto. Indicizzata |
 | `transactionHash` | `transaction_hash` | `UNIQUE`. In crypto è l'hash reale; in Stripe è un **UUID sintetico** generato per rispettare il vincolo |
 | `rete` | `rete` | `"Arbitrum"` oppure `"Stripe"` |
-| `stripeSessionId` | `stripe_session_id` | id della Checkout Session; per il crypto è **stringa vuota** |
+| `stripeSessionId` | `stripe_session_id` | id della Checkout Session, `UNIQUE` dalla `V31` ([[Idempotenza dei webhook]]); **`NULL`** per il crypto, che non ha sessioni — era stringa vuota, incompatibile col vincolo |
 | `stripePaymentIntentId` | `stripe_payment_intent_id` | serve a correlare l'evento `charge.updated` |
 | `feePending` | `fee_pending` | `true` se l'importo salvato è ancora **lordo** |
 | `metodoPagamento` | `metodo_pagamento` | `CRYPTO` \| `STRIPE` \| `PAYPAL` (mai usato) |

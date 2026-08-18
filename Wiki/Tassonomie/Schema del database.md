@@ -115,6 +115,7 @@ registrabile un evento solo per chi aveva accettato il disclaimer ([[Log operati
 | `V28__finestra_verifica_crypto.sql` | `VERIFICA_CRYPTO_FINESTRA_ORE`: chiude il riscatto di transazioni storiche ([[Pagamenti crypto Arbitrum]]) |
 | `V29__cfg_server_protetta_da_delete.sql` | `cfg_server_obbligatorie`: la FK impedisce di cancellare le configurazioni, e ne dichiara i tipi |
 | `V30__email_cliente_fuori_da_transaction_hash.sql` | `pagamenti.email_cliente`: l'email esce dall'hash sintetico e prende una colonna indicizzata ([[Pagamento]]) |
+| `V31__pagamenti_session_id_unico.sql` | `UNIQUE` su `pagamenti.stripe_session_id`: chiude il doppio accredito da retry concorrente ([[Idempotenza dei webhook]]) |
 
 > [!warning] `V29` insegna una cosa su MySQL
 > Il primo tentativo usava un trigger `BEFORE DELETE`. MySQL lo **rifiuta** con l'errore `1419` se il
@@ -346,14 +347,17 @@ passata, confermando che schema e entità erano già allineati.
 > mai in produzione. In locale `ddl-auto` era `update`. **Ora vale Flyway**, come descritto sopra; i
 > due file sono stati eliminati (la loro storia resta in git, il loro contenuto è in `V1` e `V2`).
 
-## Debito noto sui vincoli
+## Debito sui vincoli: chiuso
 
-- `payments.stripe_session_id` **non è `UNIQUE`**: l'idempotenza dei webhook supporter è solo
-  applicativa. Introdurre il vincolo richiede prima di migrare le righe crypto da `""` a `NULL`
-  ([[Idempotenza dei webhook]]).
-- `server_config.nome_configurazione` **non è `UNIQUE`**: doppie chiavi possibili
-  ([[Configurazione di server]]).
-- `snapshot_bilancio.metodo_pagamento` non contempla `STRIPE` ([[Enum di dominio]]).
+Tutte e tre le voci che stavano qui non valgono più:
+
+- `pagamenti.stripe_session_id` **è `UNIQUE` dalla `V31`**. Il vincolo era bloccato dalle righe
+  crypto, che salvavano `""` invece di `NULL` e sarebbero collidute fra loro: la migration le ha
+  normalizzate e il codice ora passa `null` ([[Idempotenza dei webhook]]);
+- `cfg_server.nome_configurazione` **è `UNIQUE` dalla `V4`**: l'affermazione contraria era un errore
+  di questa pagina, verificato sullo schema reale ([[Configurazione di server]]);
+- `snapshot_bilancio` **non esiste più**: tabella rimossa il 2026-08-13 insieme al batch che non
+  l'ha mai scritta.
 
 ## Ambiente locale
 

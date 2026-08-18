@@ -5,7 +5,7 @@ alias: [idempotenza, retry Stripe, doppio accredito]
 tag: [dominio/pagamenti]
 fonti: [Codice Discord-access-app, Piano sviluppo doppio Stripe]
 creato: 2026-07-25
-aggiornato: 2026-07-25
+aggiornato: 2026-08-18
 stato: stabile
 ---
 
@@ -19,24 +19,39 @@ doppio accredito, doppio rinnovo, doppia commissione.
 
 | Flusso | Protezione | Livello |
 |---|---|---|
-| Supporter (Stripe) | `existsByStripeSessionId(sessionId)` prima di processare | applicativo |
+| Supporter (Stripe) | `existsByStripeSessionId(sessionId)` + `UNIQUE` su `stripe_session_id` (`V31`) | applicativo **+ database** |
 | Masterclass | `existsByStripeSessionId(sessionId)` + `UNIQUE` su `stripe_session_id` | applicativo **+ database** |
 | Masterclass | `UNIQUE (user_id, masterclass_id)` | database |
 | Crypto | `tx_hash UNIQUE` + `findByHashTransazione` prima della verifica | applicativo **+ database** |
 | Commissioni | `existsByPaymentId` | applicativo |
 | Riconciliazione fee | query filtrata su `fee_pending = true` | applicativo |
 
-## ⚠️ Il punto debole: i pagamenti supporter
+## Perché il controllo applicativo da solo non basta
 
-Per il flusso supporter la protezione è **solo applicativa**: `payments.stripe_session_id` non ha un
-vincolo `UNIQUE`. Fra il controllo e l'inserimento c'è una finestra in cui due consegne concorrenti
-dello stesso evento possono passare entrambe.
+`existsByStripeSessionId` è un **check-then-act**: prima si guarda se la riga esiste, poi la si
+scrive. Nel flusso supporter, fra i due momenti passano fino a tre secondi — due
+`PaymentIntent.retrieve` verso Stripe con un `Thread.sleep(1500)` in mezzo per recuperare la
+commissione. Due consegne concorrenti dello stesso evento superano entrambe il controllo, perché
+nessuna delle due ha ancora scritto, e finiscono entrambe con un `INSERT`.
 
-La difesa vera sarebbe un indice unico, ma è **bloccata da un dettaglio dei dati**: le righe crypto
-salvano `stripe_session_id = ""` (stringa vuota, non `NULL`), quindi un `UNIQUE` le farebbe
-collidere tutte fra loro. Per introdurlo servirebbe prima migrare quelle righe a `NULL`.
+Il risultato non è un doppione innocuo: `savePaymentAndUpdateUser` **somma i mesi alla scadenza**,
+quindi l'utente ottiene il doppio del periodo pagato, e il report dei profitti conta due incassi.
 
-È un debito noto e tracciato (fonte: [[Piano sviluppo doppio Stripe]], raccomandazione [MEDIA]).
+Fino alla `V31` il flusso supporter aveva solo il controllo applicativo, ed era bloccato da un
+dettaglio dei dati: i pagamenti crypto salvavano `stripe_session_id = ""` — stringa vuota, non
+`NULL` — quindi un `UNIQUE` le avrebbe fatte collidere fra loro. La migration normalizza lo storico
+a `NULL` (che in MySQL può ripetersi) e il codice ora passa `null` per le crypto.
+
+### Cosa succede quando il vincolo scatta
+
+L'ordine dentro `savePaymentAndUpdateUser` è la parte che conta: il pagamento si scrive **prima** di
+toccare l'abbonamento, quindi il rifiuto del vincolo interrompe il metodo prima che la scadenza
+venga prolungata una seconda volta.
+
+`StripePaymentNotificationService` cattura la `DataIntegrityViolationException` e **non la rilancia**:
+è un retry riconosciuto, non un guasto. Rilanciarla farebbe rispondere male al webhook, e Stripe
+continuerebbe a ritentare per giorni un evento già andato a buon fine. L'utente non riceve un secondo
+DM di conferma: gliel'ha già mandato la prima esecuzione.
 
 ## Come rispondere agli errori
 
