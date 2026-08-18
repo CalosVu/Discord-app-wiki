@@ -28,8 +28,8 @@ I nomi effettivi vivono **solo** in [[Tabella cfg_server]]: le variabili d'ambie
 vera.
 
 Il codice cerca il ruolo **per nome** sulla guild (`getRolesByName`), quindi rinominare un ruolo su
-Discord senza aggiornare la riga rompe l'assegnazione in silenzio: viene solo loggato «Ruolo non
-trovato nel server».
+Discord senza aggiornare la riga rompe l'assegnazione — che però dal 2026-08-18 **non è più
+silenziosa**: gli admin ricevono un avviso (vedi sotto).
 
 ## Le tre operazioni
 
@@ -39,10 +39,41 @@ trovato nel server».
 - **`rimuoviRuolo`** — toglie e basta, se il membro ce l'ha davvero. Definita ma **mai invocata**:
   era pensata per la scadenza del badge GOLD, oggi non attiva.
 
-Tutte falliscono in modo **silenzioso e non bloccante**: se il ruolo non esiste, o il bot non ha i
-permessi, o l'utente ha un ruolo più alto del bot, viene loggato un errore ma il pagamento risulta
-comunque registrato a database. Un utente può quindi avere l'abbonamento valido nel DB e **nessun
-ruolo** su Discord.
+Tutte falliscono in modo **non bloccante**: se il ruolo non esiste, o il bot non ha i permessi, o
+l'utente ha un ruolo più alto del bot, il pagamento resta comunque registrato a database. Un utente
+può quindi avere l'abbonamento valido nel DB e **nessun ruolo** su Discord.
+
+## Quando un ruolo non viene assegnato, gli admin lo sanno
+
+Fino al 2026-08-18 quel fallimento era **silenzioso**: finiva in un `log.error` che nessuno legge, e
+l'utente che aveva pagato senza ottenere l'accesso se ne accorgeva prima del sistema. Ora
+`assegnaRuolo` avvisa gli admin in DM con utente, ruolo e motivo, ricordando che se c'è stato un
+pagamento l'incasso è registrato ma l'accesso no.
+
+Sono coperti tutti i modi di fallire: server irraggiungibile, ruolo inesistente (tipico dopo un
+rename su Discord), utente non trovato perché uscito dal server, e il rifiuto di Discord
+sull'aggiunta — permessi insufficienti o gerarchia dei ruoli — che prima non aveva nemmeno un
+gestore d'errore.
+
+> [!warning] `assegnaRuolo` restituisce `true` prima che il ruolo esista
+> JDA lavora in asincrono (`queue`): il valore di ritorno dice che la **richiesta è partita**, non
+> che sia andata a buon fine. Nessun chiamante dovrebbe trattarlo come conferma; l'esito reale
+> arriva dopo, ed è quello che genera l'avviso agli admin.
+
+## Il ruolo arriva solo a pagamento confermato
+
+Nel flusso crypto l'assegnazione avviene **dopo il commit** della transazione, non prima
+(`assegnaRuoloDopoIlCommit`). Discord non partecipa alla transazione: assegnare il ruolo prima
+significava che un rollback riportava indietro il database ma non il server Discord, lasciando
+l'utente abbonato con `data_scadenza_iscrizione` a `null`.
+
+Quel dettaglio è peggiore di come suona, perché [[Batch verifica abbonamenti|il batch delle 22:00]]
+inizia con `if (utente.getDataScadenzaIscrizione() != null)`: **salta proprio le scadenze nulle**.
+Un utente finito in quello stato avrebbe avuto accesso permanente e gratuito, invisibile a ogni
+controllo automatico.
+
+Il flusso Stripe non è transazionale: lì la chiamata parte subito, perché non c'è nessun commit da
+attendere.
 
 ## Il ruolo ADMIN è la sola autorizzazione applicativa
 
