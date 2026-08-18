@@ -48,17 +48,40 @@ Per aggiornarne una: si prende il SHA della nuova release
 (`curl -s https://api.github.com/repos/<owner>/<repo>/git/ref/tags/<tag>`) e si aggiorna anche il
 commento, altrimenti fra sei mesi nessuno sa più a quale versione corrisponda.
 
-## Privilegi dell'utente `deploy`
+## Due utenti sul server: `deploy` e `ci-deploy`
 
-La chiave del deploy **non deve essere una chiave di root**. In `/etc/sudoers.d/deploy-discord-bot`:
+Dal 2026-08-18 la pipeline **non entra più come `deploy`**.
+
+| Utente | Chi è | Poteri |
+|---|---|---|
+| `deploy` | l'amministratore in carne e ossa; la chiave sta sul suo PC | gruppo `sudo` con `NOPASSWD:ALL`, gruppo `docker`, gestisce MySQL e legge i log |
+| `ci-deploy` | la pipeline; la chiave sta nei **secret di GitHub** | né `sudo` generale né `docker`: solo `systemctl restart` e `status discord-bot` |
+
+La distinzione nasce da dove vive la chiave privata. Quella di `ci-deploy` sta su GitHub, cioè fuori
+dal controllo diretto: è l'unica che un attaccante può rubare senza toccare il PC dell'amministratore.
+Prima la pipeline usava `deploy`, con `NOPASSWD:ALL`, e quella chiave era di fatto **la chiave di
+root del server** — quindi accesso a `.env.prod`: token Discord, chiavi Stripe di quattro account,
+credenziali R2 e MySQL.
+
+In `/etc/sudoers.d/ci-deploy`:
 
 ```
-deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart discord-bot, /usr/bin/systemctl status discord-bot
+ci-deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart discord-bot, /usr/bin/systemctl status discord-bot
 ```
 
-Sono gli unici due comandi che il workflow esegue con `sudo`. Prima c'era
-`deploy ALL=(ALL) NOPASSWD:ALL`, che rendeva la chiave in `secrets.SERVER_SSH_KEY` equivalente a
-root sull'host — quindi accesso a `.env.prod` (token Discord, chiavi Stripe, credenziali R2 e MySQL).
+Sono esattamente i due comandi che il workflow esegue.
+
+La cartella `/home/deploy/discord-bot/deployment` appartiene a `deploy` col gruppo `ci-deploy`,
+permessi `775` più il bit **setgid**: i file creati dentro ereditano il gruppo, così i due utenti non
+si bloccano a vicenda. `/home/deploy` ha la `x` per gli altri, che basta ad attraversarla senza
+poterne elencare il contenuto.
+
+Per verificare l'assetto dopo una modifica:
+
+```bash
+sudo -u ci-deploy sudo -n systemctl status discord-bot          # i privilegi funzionano
+sudo -u ci-deploy touch /home/deploy/discord-bot/deployment/x   # la scrittura funziona
+```
 
 > [!warning] Modificare sudoers senza restare chiusi fuori
 > Si scrive in un file dedicato sotto `/etc/sudoers.d/`, non in coda a `/etc/sudoers`, e si valida
@@ -67,11 +90,11 @@ root sull'host — quindi accesso a `.env.prod` (token Discord, chiavi Stripe, c
 > `sudo` funziona ancora: una sintassi sbagliata rende `sudo` inutilizzabile, e si rientra solo
 > dalla console di recupero Hetzner.
 
-> [!caution] Il gruppo docker vanifica in parte la restrizione
-> `setup-server.sh` mette `deploy` nel gruppo `docker`, che **equivale a root**: chi parla col demone
-> può montare la radice del filesystem dentro un container. Finché l'utente del deploy resta nel
-> gruppo, i privilegi sudo ristretti riducono il danno ma non lo eliminano. La chiusura vera è
-> separare i ruoli — un utente per la CI senza docker, uno per l'amministrazione a mano.
+> [!info] Perché `ci-deploy` sta fuori dal gruppo docker
+> Appartenere al gruppo `docker` **equivale ad avere root**: chi parla col demone può montare la
+> radice del filesystem dentro un container. È il motivo per cui separare i due utenti non era un
+> vezzo: restringere i privilegi `sudo` di un utente che sta nel gruppo `docker` non serve a niente.
+> `deploy` ci resta perché gli serve per il container MySQL, ma la sua chiave non è su GitHub.
 
 ## L'ambiente di produzione
 
