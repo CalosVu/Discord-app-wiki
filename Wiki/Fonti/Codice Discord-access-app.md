@@ -19,8 +19,9 @@ Il repository applicativo: **fonte di rango 1**, la più attendibile della wiki 
 - **Branch documentato:** `main` — è quello che viene **deployato automaticamente in produzione**
   ad ogni push (vedi [[Deploy e CI-CD]]). Gli altri branch non sono coperti da questa wiki.
 - **Dimensione all'ingest:** 126 file `.java`, ~14.800 righe, 5 moduli Maven.
-- **Stack:** Java 21, Spring Boot 3.2.3, JDA 5.5.1, driver `mysql-connector-j` 9.2.0, Stripe SDK
-  29.4.0, Web3j 5.0.0, AWS SDK v2 (S3/R2), Flyway 9.22.3, Lombok, MapStruct 1.6.3.
+- **Stack:** Java 21, Spring Boot 3.5.16 (Tomcat 10.1.55, Spring Framework 6.2, Security 6.5),
+  JDA 5.5.1, driver `mysql-connector-j` 9.2.0, Stripe SDK 29.4.0, Web3j 5.0.0, AWS SDK v2 (S3/R2),
+  Flyway 11, springdoc 2.9.0, Lombok, MapStruct 1.6.3.
 - ⚠️ Il **server** MySQL è una cosa distinta dal driver: in locale il container usa `mysql:latest`
   (verificato **9.3** il 2026-07-26). Il `9.2.0` che si trova nella documentazione è la versione del
   driver JDBC, non del database.

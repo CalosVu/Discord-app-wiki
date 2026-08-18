@@ -327,10 +327,12 @@ fallire il boot** se non corrisponde alle entità. Lo schema lo costruisce Flywa
 5. Lo storico delle applicazioni vive nella tabella **`flyway_schema_history`**, creata alla prima
    esecuzione.
 
-> ℹ️ Flyway 9.22.3 (versione gestita da Spring Boot 3.2.3) dichiara il supporto fino a MySQL 8: con
+> ℹ️ Flyway 11 (versione gestita da Spring Boot 3.5.16) dichiara il supporto fino a MySQL 8.1: con
 > MySQL 9.x emette all'avvio un **warning** «Flyway upgrade recommended: MySQL 9.3 is newer than this
-> version of Flyway» e prosegue. Non è un errore — verificato in locale il 2026-07-26.
-> Un override a Flyway 10/11 non è compatibile con la `FlywayAutoConfiguration` di Spring Boot 3.2.
+> version of Flyway» e prosegue. Non è un errore — il warning c'era anche con Flyway 9.22.3 e resta
+> identico dopo l'aggiornamento (verificato in locale il 2026-08-18).
+> Dalla 10 il supporto MySQL vive nell'artifact separato **`flyway-mysql`**: senza quella dipendenza
+> l'avvio fallisce. I checksum delle migration già applicate non cambiano passando dalla 9 alla 11.
 
 Prima applicazione in locale (2026-07-26): Flyway ha creato `flyway_schema_history` con un'unica riga
 `version 2`, `type BASELINE`, `success 1`, senza eseguire V1 e V2 — e la validazione Hibernate è

@@ -16,7 +16,7 @@ Sintesi di alto livello del prodotto e mappa della wiki.
 ## Di cosa si tratta
 
 **VuPass** è il prodotto che gestisce gli accessi a pagamento a una community Discord: applicazione
-Java 21 / Spring Boot 3.2.3 con bot JDA 5.5.1. Fa parte della famiglia **VuTradingFarm**, insieme a
+Java 21 / Spring Boot 3.5.16 con bot JDA 5.5.1. Fa parte della famiglia **VuTradingFarm**, insieme a
 *VuTracker* (portfolio) e *VuMarkets* (produzione e pubblicazione di contenuti social).
 
 Il bot parla con gli utenti in messaggio privato: verifica l'accettazione del disclaimer, incassa
