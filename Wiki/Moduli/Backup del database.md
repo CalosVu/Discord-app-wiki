@@ -24,8 +24,9 @@ Il backup automatico del database MySQL, eseguito **dall'applicazione stessa** c
    `<database>_backup_yyyy-MM-dd_HH-mm-ss.sql`.
 4. Attende con **timeout** (default 300 secondi); allo scadere uccide il processo e segnala il
    fallimento.
-5. Se l'esito è positivo, elimina i backup più vecchi della **retention** (default 7 giorni),
-   deducendo la data dal nome del file.
+5. Se l'esito è positivo comprime il dump in `.sql.gz`; se è negativo cancella il `.sql` parziale.
+6. Elimina i backup più vecchi della **retention** (default 7 giorni), deducendo la data dal nome
+   del file — **sempre**, anche dopo un fallimento, ma senza mai toccare i tre dump più recenti.
 
 ## La password non finisce nella process list
 
@@ -71,12 +72,43 @@ Sotto `spring.datasource.backup` ([[Ambienti e profili Spring]]):
 | `timeout-seconds` | 300 |
 | `mysqldump-command` | `mysqldump` |
 
-⚠️ Due parametri sono **dichiarati ma non usati come ci si aspetterebbe**:
+Dal 2026-08-18 **tutti i parametri fanno quello che dicono**. Fino a quel giorno due mentivano:
 
-- `mysqldump-command` non viene letto: il comando è la stringa letterale `"mysqldump"` nel codice.
-  Rinominare o spostare il binario rompe il backup a prescindere dalla configurazione.
-- `compression-enabled` aggiunge il flag `--compress` a mysqldump, che comprime **il protocollo di
-  rete**, non il file prodotto. Il `.sql` resta non compresso.
+- `mysqldump-command` non veniva letto — il comando era la stringa letterale `"mysqldump"` nel
+  codice — quindi rinominare o spostare il binario rompeva il backup a prescindere;
+- `compression-enabled` aggiungeva `--compress` a mysqldump, che comprime **il protocollo di rete**
+  verso un server che sta in locale. Il `.sql` restava intero.
+
+## La compressione
+
+Con `compression-enabled: true` (default) il dump viene compresso in **gzip** e l'originale rimosso:
+il file finale è `<database>_backup_<timestamp>.sql.gz`. Un dump SQL scende tipicamente a un decimo.
+
+Se la compressione fallisce resta il `.sql` non compresso e il backup è considerato riuscito lo
+stesso: un backup non compresso vale più di nessun backup.
+
+Per ripristinare da un file compresso:
+
+```bash
+gunzip -c discord_db_backup_2026-08-18_22-00-00.sql.gz | mysql -u <utente> -p <database>
+```
+
+## La pulizia dei vecchi backup
+
+Gira **a ogni esecuzione**, riuscita o fallita. Prima stava dentro il ramo positivo: se i backup
+fallivano, nessuno rimuoveva più nulla e la cartella cresceva senza limite.
+
+Il rischio opposto — cancellare l'ultimo dump buono mentre i nuovi falliscono da settimane — è
+coperto da una regola semplice: **i 3 dump più recenti non si toccano mai**, quale che sia la loro
+età. Meglio qualche file oltre la retention che una cartella vuota nel momento del bisogno.
+
+Altri due dettagli:
+
+- se `mysqldump` fallisce, il `.sql` parziale viene **cancellato**: è inutilizzabile e altrimenti
+  occuperebbe uno dei tre posti riservati ai dump recenti, facendo cancellare quelli buoni. Il
+  `.log` con l'errore resta;
+- i `.log` di stderr non sono backup: seguono la sola regola dell'anzianità e non entrano nel
+  conteggio dei tre conservati.
 
 ## Prerequisiti sul server
 
