@@ -27,7 +27,32 @@ tornare indietro con `git revert` in caso di problemi.
 2. JDK 21 (Temurin) con cache Maven;
 3. `mvn clean package` — **i test vengono eseguiti**: un test rosso ferma il deploy. Fino al
    2026-08-18 la pipeline usava `-DskipTests` e mandava in produzione artefatti mai verificati;
-4. `scp` del JAR sul server e, via `ssh`, rinomina in `app.jar` + `systemctl restart discord-bot`.
+4. `scp` del JAR sul server e, via `ssh`, rinomina in `app.jar` + `systemctl restart discord-bot`;
+5. **attesa di 30 secondi e verifica che il servizio sia ancora vivo**: se non lo è, il passo esce
+   con errore e la pipeline diventa rossa.
+
+## Perché il deploy aspetta trenta secondi
+
+systemd considera avviato un servizio `simple` **appena il processo parte**, molto prima che Spring
+Boot arrivi in fondo — l'avvio ne impiega circa sette, di secondi, e le migration Flyway girano in
+mezzo. Fino al 2026-08-19 il workflow aspettava 5 secondi e poi chiamava `systemctl status` senza
+guardarne l'esito: **un'applicazione che moriva dopo lasciava la pipeline verde e il bot spento**, e
+la notizia arrivava dagli utenti.
+
+Non è teoria: è successo due volte in agosto, con `V29` (errore MySQL `1419` sui trigger) e con
+`V31` (un duplicato preesistente, vedi [[Idempotenza dei webhook]]). In entrambi i casi Flyway ha
+fatto fallire l'avvio **dopo** che il processo era partito.
+
+Ora la verifica è `systemctl is-active --quiet discord-bot`, che restituisce un codice di uscita:
+servizio assente → `exit 1` → pipeline rossa, con lo stato del servizio stampato nel log del
+workflow.
+
+> [!info] Perché `is-active` non ha bisogno di `sudo`
+> È una lettura di stato, non un'operazione privilegiata: nessuna riga in più nel sudoers di
+> `ci-deploy`. E i comandi che invece usano `sudo` restano **senza opzioni aggiuntive** — la regola
+> autorizza esattamente `systemctl status discord-bot`, quindi anche un innocuo `--no-pager` lo
+> renderebbe un comando non autorizzato, con sudo che chiede la password e il deploy che fallisce
+> per il motivo sbagliato.
 
 Segreti necessari nel repository: `SERVER_HOST` e `SERVER_SSH_KEY` (chiave privata dedicata,
 generata sul server per l'utente `deploy`).
