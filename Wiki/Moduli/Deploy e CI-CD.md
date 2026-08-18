@@ -25,12 +25,53 @@ tornare indietro con `git revert` in caso di problemi.
 
 1. checkout del codice;
 2. JDK 21 (Temurin) con cache Maven;
-3. `mvn clean package -DskipTests` — ⚠️ **i test non vengono eseguiti** nella pipeline: il verde di
-   `mvn test` va verificato in locale;
+3. `mvn clean package` — **i test vengono eseguiti**: un test rosso ferma il deploy. Fino al
+   2026-08-18 la pipeline usava `-DskipTests` e mandava in produzione artefatti mai verificati;
 4. `scp` del JAR sul server e, via `ssh`, rinomina in `app.jar` + `systemctl restart discord-bot`.
 
 Segreti necessari nel repository: `SERVER_HOST` e `SERVER_SSH_KEY` (chiave privata dedicata,
 generata sul server per l'utente `deploy`).
+
+## Perché le action sono fissate a un SHA
+
+Nel workflow le action non compaiono come `@v4` ma come SHA di commit, con il tag nel commento:
+
+```yaml
+uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2  # v1.2.5
+```
+
+Un tag Git **si può spostare**, e queste action ricevono `secrets.SERVER_SSH_KEY`. Se il repository
+di un'action venisse compromesso e il tag riscritto, la chiave del server uscirebbe al primo push
+senza che nulla qui sia cambiato. Il SHA non si sposta.
+
+Per aggiornarne una: si prende il SHA della nuova release
+(`curl -s https://api.github.com/repos/<owner>/<repo>/git/ref/tags/<tag>`) e si aggiorna anche il
+commento, altrimenti fra sei mesi nessuno sa più a quale versione corrisponda.
+
+## Privilegi dell'utente `deploy`
+
+La chiave del deploy **non deve essere una chiave di root**. In `/etc/sudoers.d/deploy-discord-bot`:
+
+```
+deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart discord-bot, /usr/bin/systemctl status discord-bot
+```
+
+Sono gli unici due comandi che il workflow esegue con `sudo`. Prima c'era
+`deploy ALL=(ALL) NOPASSWD:ALL`, che rendeva la chiave in `secrets.SERVER_SSH_KEY` equivalente a
+root sull'host — quindi accesso a `.env.prod` (token Discord, chiavi Stripe, credenziali R2 e MySQL).
+
+> [!warning] Modificare sudoers senza restare chiusi fuori
+> Si scrive in un file dedicato sotto `/etc/sudoers.d/`, non in coda a `/etc/sudoers`, e si valida
+> con `visudo -c -f <file>` **prima** di considerarlo attivo. Verificare il percorso reale con
+> `which systemctl`. Non chiudere la sessione SSH finché un secondo terminale non conferma che
+> `sudo` funziona ancora: una sintassi sbagliata rende `sudo` inutilizzabile, e si rientra solo
+> dalla console di recupero Hetzner.
+
+> [!caution] Il gruppo docker vanifica in parte la restrizione
+> `setup-server.sh` mette `deploy` nel gruppo `docker`, che **equivale a root**: chi parla col demone
+> può montare la radice del filesystem dentro un container. Finché l'utente del deploy resta nel
+> gruppo, i privilegi sudo ristretti riducono il danno ma non lo eliminano. La chiusura vera è
+> separare i ruoli — un utente per la CI senza docker, uno per l'amministrazione a mano.
 
 ## L'ambiente di produzione
 
