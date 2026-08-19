@@ -18,7 +18,7 @@ componenti.
 
 - [[Bot Discord]] — avvio, intent, listener, routing degli eventi.
 - [[Onboarding e disclaimer]] — dall'ingresso nel server al censimento dell'utente.
-- [[Comandi utente]] — `!Comandi`, `!Donazione`, `!verifica-transazione`, `!Bacheca`, `!masterclass`…
+- [[Comandi utente]] — `!Comandi`, `!Donazione`, `!verifica-transazione`, `!masterclass`…
 - [[Comandi admin]] — il menu `!Admin` con report, prelievi, scadenze, fix referral.
 - [[Comandi agenti]] — `!mieiref`.
 - [[Comandi relatori]] — `!miemasterclass`.

@@ -31,6 +31,13 @@ costruzione non aggiorna mai nessun utente.
 
 Tre difetti distinti, che si sommano.
 
+> [!info] Il codice descritto qui non esiste più
+> Questa scheda fotografa il **25 luglio 2026**. `InviteUsageService` e `handleFixReferrals` sono
+> stati rimossi con il passaggio a Flyway e all'attribuzione persistita del referral: oggi il
+> meccanismo è `!SyncReferral` (`CommandBot.handleSyncReferralCommand`) appoggiato a
+> [[Referral pendente]] e `AttribuzioneReferralService`. Cercare quelle classi nel codice attuale
+> non porta da nessuna parte — resta utile il **perché** del difetto, non il dove.
+
 ## Difetto 1 — Fix Referral è logicamente inefficace
 
 `CommandBot.handleFixReferrals` invoca `InviteUsageService.updateUsersWithoutValidReferral()`.

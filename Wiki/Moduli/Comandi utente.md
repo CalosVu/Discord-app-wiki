@@ -22,7 +22,6 @@ iniziano con `!` e il confronto è case-insensitive.
 | `!Stato-disclaimer` | mostra se il disclaimer risulta accettato | no |
 | `!Donazione` | avvia il flusso di pagamento: scelta fra Crypto e Stripe | **sì** |
 | `!verifica-transazione` | avvia la verifica di un pagamento crypto | **sì** |
-| `!Bacheca` | mostra contatti, servizi attivi, canali utili, orari | **sì** |
 | `!masterclass` | avvia l'acquisto di una masterclass | no |
 | `!miemasterclass` | report vendite — solo se si è [[Relatore]] | no |
 | `!mieiref` | report commissioni — solo se si è [[Agente]] | no |
@@ -52,8 +51,16 @@ riaccenderlo si passa dal database.
 
 *Stato Disclaimer* · *Info Donazione* · *Verifica Transazione* · *Bacheca* · *Verifica Scadenza*.
 
-L'ultimo (`!Scadenza-abbonamento`) esiste **solo come pulsante**, non come comando testuale: mostra
-la data di scadenza dell'abbonamento.
+**Due di questi esistono solo come pulsante**, non come comando testuale — scriverli in chat non
+produce nulla, perché `MessageReceivedListener` non li conosce:
+
+| Pulsante | Id interno | Cosa mostra |
+|---|---|---|
+| *Bacheca* | `!Bacheca` | contatti, servizi attivi, canali utili, orari |
+| *Verifica Scadenza* | `!Scadenza-abbonamento` | la data di scadenza dell'abbonamento |
+
+Gli altri tre corrispondono ai comandi testuali della tabella sopra, e il pulsante fa esattamente
+quello che farebbe il comando.
 
 ## Il flusso di donazione, passo per passo
 

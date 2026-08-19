@@ -31,7 +31,7 @@ metodo `discordService.hasAcceptedDisclaimer(discordId)` viene invocato all'ingr
 - `!verifica-transazione` e l'apertura della modale;
 - la generazione dei link Stripe;
 - l'effettiva verifica di una transazione crypto;
-- `!Bacheca`.
+- il pulsante *Bacheca* (`!Bacheca`, che esiste **solo** come pulsante — vedi [[Comandi utente]]).
 
 Chi non ha accettato riceve un embed che lo rimanda al canale `#disclaimer`. Il comando `!Comandi`
 e `!Stato-disclaimer` restano invece sempre disponibili.
