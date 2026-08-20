@@ -111,11 +111,17 @@ modo di ricostruire un errore.
 > dati: produce riempitivi. La `V32` ha accodato quei testi alla descrizione (senza duplicarli
 > dove già comparivano) e ha svuotato la colonna, che ora significa una cosa sola.
 
-> [!caution] Manca il vincolo di unicità sull'hash
-> Era previsto nella `V32` ma **due righe storiche condividono un hash vero** (id 24 e 25) e vanno
-> decise a mano: potrebbero essere due voci contabili coperte da un solo trasferimento, oppure un
-> doppione. Nel frattempo il duplicato è intercettato dal servizio prima del salvataggio, quindi
-> dal bot non si può creare; resta possibile scrivendo direttamente a database.
+> [!info] Perché non c'è un vincolo di unicità sull'hash
+> Era previsto nella `V32`, ed è stato **tolto di proposito**: le righe 24 e 25 condividono un hash
+> legittimamente, perché un solo trasferimento può coprire **più voci contabili**. Un `UNIQUE` le
+> renderebbe irrappresentabili.
+>
+> Il duplicato è comunque **rifiutato dal servizio** prima del salvataggio, quindi dal bot non se
+> ne creano di nuovi; resta possibile scrivendo direttamente a database.
+>
+> Se dovesse ripresentarsi il caso di un trasferimento che copre due voci, la strada è registrare
+> l'hash su **una sola** delle due righe e lasciarlo vuoto sull'altra, spiegando il collegamento
+> nelle note. Prima della `V32` non si poteva, perché la colonna era obbligatoria.
 
 ## Voci correlate
 - [[Pagamento]]
