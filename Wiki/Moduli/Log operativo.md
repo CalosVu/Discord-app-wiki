@@ -5,7 +5,7 @@ alias: [sys_log_server, LogServer, LogServerService, log]
 tag: [dominio/infrastruttura]
 fonti: [Codice Discord-access-app]
 creato: 2026-08-13
-aggiornato: 2026-08-16
+aggiornato: 2026-08-20
 stato: stabile
 ---
 
@@ -24,6 +24,12 @@ distanza di mesi.
 |---|---|---|
 | `DEGRADO_RUOLO` | il batch delle 22:00 toglie il ruolo a un abbonamento scaduto | `VerificaAbbonamentiBatch`, subito dopo il cambio ruolo |
 | `PAGAMENTO` | un pagamento è registrato, in euro (Stripe) o in crypto (USDT) | `CryptoPaymentService.savePaymentAndUpdateUser` |
+| `PRELIEVO` | un amministratore crea, modifica, annulla o cancella un [[Prelievo\|prelievo]] | `PrelieviBot`, dopo ogni operazione riuscita |
+
+`PRELIEVO` è diverso dagli altri due: quelli registrano fatti automatici, questo un'**azione umana**
+su un dato contabile. Da quando i prelievi si gestiscono dal bot — e un cliente non vede il
+database — è l'unica traccia di chi ha cambiato cosa. Per le modifiche la descrizione riporta anche
+il prima e il dopo: «importo 100,00 → 150,00».
 
 La scrittura dei pagamenti è messa in `savePaymentAndUpdateUser` perché è il **punto unico** da cui
 passano entrambi i canali: le crypto lo chiamano direttamente, Stripe lo raggiunge tramite

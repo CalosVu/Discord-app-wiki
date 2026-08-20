@@ -5,7 +5,7 @@ alias: [menu Admin, pannello di controllo]
 tag: [dominio/bot, dominio/comandi, dominio/admin]
 fonti: [Codice Discord-access-app]
 creato: 2026-07-25
-aggiornato: 2026-08-17
+aggiornato: 2026-08-20
 stato: stabile
 ---
 
@@ -32,7 +32,7 @@ ignorato.
 
 | Voce | Cosa fa |
 |---|---|
-| **Salva Prelievo** | modale a 5 campi per registrare un'uscita → [[Prelievo]] |
+| **Prelievi** | gestione completa: crea, elenca, modifica, annulla, cancella → [[Prelievo]] |
 | **Report Saldo** | tre sezioni: Crypto, Stripe **Primario**, Stripe **Secondario** — depositi, prelievi, saldo. Le sezioni Stripe mostrano nel titolo quota attuale e obiettivo di ripartizione |
 | **Report Pagamenti** | modale con range di date → totali e numero transazioni, crypto e Stripe |
 | **Report Completo** | come sopra, più saldo netto del periodo e abbonati attivi |
@@ -71,14 +71,26 @@ Non esiste nessun job schedulato: l'operazione parte solo su richiesta.
 Dopo ogni operazione il menu viene **rinviato in chat** (`resendMenu`), così non serve ridigitare
 `!Admin`.
 
-## Dettaglio: Salva Prelievo
+## Dettaglio: Prelievi
 
-Modale con **importo**, **metodo pagamento**, **wallet destinatario**, **hash transazione**,
-**descrizione**. Il campo metodo accetta `CRYPTO`, `STRIPE_PRIMARIO` o `STRIPE_SECONDARIO`: per Stripe serve
-a imputare il prelievo all'account giusto ([[Bilanciamento degli account Stripe]]).
+Non è più una singola finestra di inserimento ma una **gestione completa** — creare, elencare,
+modificare, annullare, cancellare — perché il prodotto andrà a clienti senza accesso al database.
 
-⚠️ La verifica on-chain dell'hash viene eseguita **anche per i prelievi Stripe**: vedi [[Prelievo]]
-per i dettagli delle validazioni.
+```
+📥 Prelievi
+   ├─ ➕ Nuovo → menu canale/valuta → finestra (campi diversi per crypto e Stripe)
+   ├─ 🕒 Ultimi 10
+   └─ 📅 Cerca per periodo
+          └─ scheda del movimento → ✏️ Modifica · 🔁 Stato · 🗑️ Elimina
+```
+
+Il canale si sceglie da un menu (`🪙 Crypto · USDT`, `💳 Stripe Primario · EUR`, …), non si scrive:
+serve anche a stare dentro il limite di cinque campi per finestra. Per Stripe non vengono chiesti
+hash e wallet, che un bonifico non ha.
+
+⚠️ **La verifica on-chain è stata rimossa** il 2026-08-20, insieme all'obbligo di hash e wallet.
+Rendeva i prelievi Stripe impossibili senza dati inventati, e su un movimento che l'amministratore
+ha già eseguito non aggiungeva nulla. Vedi [[Prelievo]] per validazioni, stati e tracciamento.
 
 ## Dettaglio: i report per periodo
 
@@ -105,6 +117,10 @@ Per **riaccenderlo** si passa comunque dal database — vedi qui sotto.
 Non esistono comandi per: creare o modificare [[Agente|agenti]], [[Relatore|relatori]],
 [[Masterclass]], [[Utente lifetime]], voci del [[Catalogo servizi]] o parametri di
 [[Tabella cfg_server]]. Tutte queste operazioni si fanno **a mano via SQL** sul database.
+
+I [[Prelievo|prelievi]] sono la prima eccezione: dal 2026-08-20 hanno una gestione completa dal
+bot. È il modello a cui dovranno adeguarsi le altre voci quando il prodotto verrà venduto, perché
+un cliente non avrà un client SQL a cui appoggiarsi.
 
 ## Voci correlate
 - [[Reportistica]]
