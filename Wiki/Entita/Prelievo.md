@@ -17,6 +17,26 @@ realmente rimasto sui conti. Tabella `pagamenti_prelievi`, entità `TrackPreliev
 Dal 2026-08-20 si gestisce **interamente dal bot** — creazione, modifica, cambio di stato,
 cancellazione — perché il prodotto andrà a clienti che non avranno accesso al database.
 
+## Chi può gestirli
+
+Non tutti gli amministratori. La voce *Prelievi* del menu risponde solo agli ID elencati in
+**`PRELIEVI_UTENTI_AUTORIZZATI`** ([[Tabella cfg_server]]): gli admin possono essere più d'uno, ma
+i movimenti di cassa non riguardano tutti.
+
+| Elenco | Chi entra |
+|---|---|
+| **vuoto** (valore iniziale) | tutti gli amministratori — è il comportamento precedente alla chiave |
+| valorizzato | solo gli ID indicati, **e solo se sono anche amministratori** |
+| illeggibile o mancante | tutti gli amministratori: un errore di configurazione non deve bloccare la cassa |
+
+> [!info] Restringe, non allarga
+> La voce vive dentro `!Admin`, quindi chi non è amministratore non ci arriva comunque. Elencare
+> l'ID di un non-admin non gli dà accesso a niente.
+
+Il controllo è ripetuto in **tre punti**: la voce di menu si nasconde a chi non è autorizzato,
+`PrelieviBot` rifiuta ogni interazione — un menu già inviato resta cliccabile anche dopo — e
+`PrelieviService` verifica di nuovo prima di toccare i dati.
+
 ## Come si registra
 
 `!Admin` → **📥 Prelievi** → *Nuovo*. Si sceglie il canale da un menu, non si digita:
@@ -83,7 +103,7 @@ bonifico non ha un hash Arbitrum, e bisognava riciclarne uno vero di un'altra tr
 
 ## Validazioni rimaste
 
-1. **autorizzazione**: `discordService.isAdmin(...)` a ogni ingresso, menu compresi;
+1. **autorizzazione**: `puoGestirePrelievi(...)` a ogni ingresso, menu compresi — ruolo admin **e** presenza in elenco;
 2. **importo** positivo e sotto 1.000.000, con la virgola accettata come separatore;
 3. **formato** di hash e wallet, *se valorizzati*: `0x` + 64 e `0x` + 40 esadecimali;
 4. **hash non già registrato**, per non contare due volte lo stesso movimento;
@@ -99,7 +119,17 @@ modo di ricostruire un errore.
 ## Campi
 
 `importo`, `valuta`, `metodoPagamento`, `stripeAccount`, `transactionHash`, `walletDestinatario`,
-`dataPrelievo`, `descrizione`, `note`, `stato`, `idDiscordAdmin`, `dataUpdate`.
+`dataPrelievo`, `descrizione`, `note`, `stato`, `idDiscordAdmin`, `autoreUsername`, `dataUpdate`.
+
+**Chi ha registrato** il movimento sta in due colonne: `idDiscordAdmin` (l'ID, c'era già) e
+`autoreUsername` (il nome, dalla `V33`). Il nome si salva invece di risolverlo al volo perché la
+chiamata a Discord può fallire, e perché chi ha registrato può nel frattempo aver cambiato nome o
+lasciato il server — la stessa scelta del [[Log operativo]]. La scheda lo mostra in fondo:
+«Registrato da **Calos**». Le righe scritte a mano prima della `V33` hanno solo l'ID, e la scheda
+mostra quello.
+
+Una **modifica non riscrive l'autore**: resta chi ha registrato il movimento. Chi ha fatto la
+correzione è tracciato nel log operativo, che è il posto della storia delle modifiche.
 
 > [!warning] `descrizione` e `note` convivono, e `transaction_hash` conteneva testo
 > Nello storico scritto a mano le due colonne dicono cose diverse, quindi nessuna è stata unificata

@@ -117,6 +117,7 @@ registrabile un evento solo per chi aveva accettato il disclaimer ([[Log operati
 | `V30__email_cliente_fuori_da_transaction_hash.sql` | `pagamenti.email_cliente`: l'email esce dall'hash sintetico e prende una colonna indicizzata ([[Pagamento]]) |
 | `V31__pagamenti_session_id_unico.sql` | `UNIQUE` su `pagamenti.stripe_session_id`: chiude il doppio accredito da retry concorrente ([[Idempotenza dei webhook]]) |
 | `V32__prelievi_gestibili_dal_bot.sql` | `pagamenti_prelievi`: hash e descrizione facoltativi, i testi finiti nell'hash accodati alla descrizione, `PRELIEVO` fra i tipi del [[Log operativo]] ([[Prelievo]]) |
+| `V33__prelievi_autore_e_autorizzati.sql` | `pagamenti_prelievi.autore_username` e la chiave `PRELIEVI_UTENTI_AUTORIZZATI`, col nuovo tipo `LISTA_ID_DISCORD` ([[Tabella cfg_server]]) |
 
 > [!warning] `V29` insegna una cosa su MySQL
 > Il primo tentativo usava un trigger `BEFORE DELETE`. MySQL lo **rifiuta** con l'errore `1419` se il

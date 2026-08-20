@@ -27,6 +27,7 @@ boot**.
 | `VERIFICA_CRYPTO_FINESTRA_ORE` | `24` | INTERO | `CryptoPaymentService` | ore entro cui una transazione è verificabile. `0` disattiva |
 | `COMANDI_BOT_ABILITATI` | `true` | BOOLEANO | `ComandiBotService` | interruttore generale delle interazioni col bot |
 | `LOG_CONSERVAZIONE_GIORNI` | `365` | INTERO | `VerificaAbbonamentiBatch` | conservazione del [[Log operativo]]. `0` conserva tutto |
+| `PRELIEVI_UTENTI_AUTORIZZATI` | vuoto | LISTA_ID_DISCORD | `PrelieviAutorizzazioneService` | chi vede la voce [[Prelievo\|Prelievi]] del menu admin. **Vuoto = tutti gli admin** |
 | `PIONIERI_ABILITATI` | `true` | BOOLEANO | `PianoUtenteService` | a `false` tutti pagano `BASIC` |
 | `PIONIERI` | `50` | INTERO | `PianoUtenteService` | tetto dei posti pioniere. `0` = nessun pioniere, mai |
 | `PIONIERI_ASSEGNATI` | quelli esistenti | INTERO | `PianoUtenteService` | posti consumati. **Non si decrementa mai** |
@@ -141,13 +142,27 @@ non se ne accorge nessuno.
 
 ### La tabella è anche l'inventario
 
-`cfg_server_obbligatorie` contiene nome, **tipo** (`INTERO`, `BOOLEANO`, `TESTO`) e una nota, ed è la
+`cfg_server_obbligatorie` contiene nome, **tipo** e una nota, ed è la
 **sola fonte**: il codice legge l'elenco da lì invece di tenerne una copia in Java. Con due elenchi
 separati, aggiungere una chiave in un posto e dimenticarla nell'altro avrebbe prodotto una
 configurazione obbligatoria ma cancellabile, o viceversa.
 
 Ne segue che **per rendere obbligatoria una configurazione basta una migration**, senza toccare
 codice.
+
+I tipi disponibili, e cosa accettano:
+
+| Tipo | Valori validi |
+|---|---|
+| `INTERO` | cifre, anche negative. Lo zero è ammesso, e su diverse chiavi significa «disattivato» |
+| `BOOLEANO` | esattamente `true` o `false`: né `si`, né `1`, né `on` |
+| `TESTO` | testo **non vuoto** — è il caso dei nomi dei ruoli Discord |
+| `LISTA_ID_DISCORD` | ID Discord separati da virgola, **oppure vuoto** |
+
+L'ultimo è nato con la `V33` per `PRELIEVI_UTENTI_AUTORIZZATI`, dove il vuoto è il valore
+predefinito e significa «tutti gli amministratori»: con `TESTO` l'avvio si sarebbe bloccato. Valida
+anche il formato — 17-20 cifre — così incollare la menzione `@Calos` invece dell'ID si scopre
+all'avvio, e non il giorno in cui qualcuno non riesce ad aprire i prelievi.
 
 ### Come si aggiunge una riga
 
