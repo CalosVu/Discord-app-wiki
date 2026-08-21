@@ -30,16 +30,22 @@ ignorato.
 
 ## Le otto voci del menu
 
-| Voce | Cosa fa |
-|---|---|
-| **Prelievi** | gestione completa: crea, elenca, modifica, annulla, cancella → [[Prelievo]] |
-| **Report Saldo** | tre sezioni: Crypto, Stripe **Primario**, Stripe **Secondario** — depositi, prelievi, saldo. Le sezioni Stripe mostrano nel titolo quota attuale e obiettivo di ripartizione |
-| **Report Pagamenti** | modale con range di date → totali e numero transazioni, crypto e Stripe |
-| **Report Completo** | come sopra, più saldo netto del periodo e abbonati attivi |
-| **Scadenze Mese** | elenco degli utenti in scadenza nel mese corrente, con data |
-| **Report Agente** | selezione agente → periodo → **lo stesso report** che vede l'agente |
-| **Report Masterclass** | selezione relatore → masterclass → periodo → vendite |
-| **Profitti Masterclass** | selezione periodo → profitti globali con breakdown per relatore |
+Quattro voci sono **riservate**: compaiono solo a chi è elencato nella chiave corrispondente di
+[[Tabella cfg_server]] — `PRELIEVI_UTENTI_AUTORIZZATI` per i prelievi,
+`REPORT_UTENTI_AUTORIZZATI` per i tre report economici. Elenco vuoto significa «tutti gli
+amministratori», ed è il valore predefinito. Il controllo è ripetuto dentro ogni handler, perché un
+componente Discord già inviato resta cliccabile.
+
+| Voce | Riservata | Cosa fa |
+|---|---|---|
+| **Prelievi** | 🔒 | gestione completa: crea, elenca, modifica, annulla, cancella → [[Prelievo]] |
+| **Report Saldo** | 🔒 | Crypto e Stripe — depositi, prelievi, saldo *ad adesso*. Con **due** conti Stripe le sezioni diventano Primario e Secondario, ognuna col titolo che mostra quota attuale e obiettivo di ripartizione |
+| **Report Pagamenti** | 🔒 | menu dei periodi (o date a mano) → **l'elenco di chi ha pagato**, dal più recente: data, utente, importo, canale, abbonamento o donazione, email. In coda i totali per canale |
+| **Report Completo** | 🔒 | menu dei periodi (o date a mano) → entrate per canale con media e confronto sul periodo precedente, composizione abbonamenti/donazioni, prelievi, saldo del periodo, nuovi iscritti e rinnovi |
+| **Scadenze Mese** | | elenco degli utenti in scadenza nel mese corrente, con data |
+| **Report Agente** | | selezione agente → periodo → **lo stesso report** che vede l'agente |
+| **Report Masterclass** | | selezione relatore → masterclass → periodo → vendite |
+| **Profitti Masterclass** | | selezione periodo → profitti globali con breakdown per relatore |
 
 > [!warning] Storia / claim superate
 > Fino al 2026-07-26 il menu aveva **nove** voci: la nona era *Fix Referral*, che prometteva di

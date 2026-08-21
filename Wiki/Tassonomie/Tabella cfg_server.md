@@ -27,7 +27,9 @@ boot**.
 | `VERIFICA_CRYPTO_FINESTRA_ORE` | `24` | INTERO | `CryptoPaymentService` | ore entro cui una transazione è verificabile. `0` disattiva |
 | `COMANDI_BOT_ABILITATI` | `true` | BOOLEANO | `ComandiBotService` | interruttore generale delle interazioni col bot |
 | `LOG_CONSERVAZIONE_GIORNI` | `365` | INTERO | `VerificaAbbonamentiBatch` | conservazione del [[Log operativo]]. `0` conserva tutto |
-| `PRELIEVI_UTENTI_AUTORIZZATI` | vuoto | LISTA_ID_DISCORD | `PrelieviAutorizzazioneService` | chi vede la voce [[Prelievo\|Prelievi]] del menu admin. **Vuoto = tutti gli admin** |
+| `PRELIEVI_UTENTI_AUTORIZZATI` | vuoto | LISTA_ID_DISCORD | `AutorizzazioniAdminService` | chi vede la voce [[Prelievo\|Prelievi]] del menu admin. **Vuoto = tutti gli admin** |
+| `NOTIFICHE_ADMIN_AUTORIZZATI` | vuoto | LISTA_ID_DISCORD | `DiscordService` | chi riceve in DM le notifiche di **pagamento** e **degrado** ([[Notifiche agli amministratori]]). **Vuoto = tutti gli admin**. Gli avvisi tecnici arrivano comunque a tutti |
+| `REPORT_UTENTI_AUTORIZZATI` | vuoto | LISTA_ID_DISCORD | `AutorizzazioniAdminService` | chi apre Report Saldo, Pagamenti e Completo ([[Reportistica]]). **Vuoto = tutti gli admin**. Gli altri report del menu restano di tutti |
 | `PIONIERI_ABILITATI` | `true` | BOOLEANO | `PianoUtenteService` | a `false` tutti pagano `BASIC` |
 | `PIONIERI` | `50` | INTERO | `PianoUtenteService` | tetto dei posti pioniere. `0` = nessun pioniere, mai |
 | `PIONIERI_ASSEGNATI` | quelli esistenti | INTERO | `PianoUtenteService` | posti consumati. **Non si decrementa mai** |
@@ -163,6 +165,15 @@ L'ultimo è nato con la `V33` per `PRELIEVI_UTENTI_AUTORIZZATI`, dove il vuoto �
 predefinito e significa «tutti gli amministratori»: con `TESTO` l'avvio si sarebbe bloccato. Valida
 anche il formato — 17-20 cifre — così incollare la menzione `@Calos` invece dell'ID si scopre
 all'avvio, e non il giorno in cui qualcuno non riesce ad aprire i prelievi.
+
+La `V34` ha aggiunto `NOTIFICHE_ADMIN_AUTORIZZATI` e la `V35` `REPORT_UTENTI_AUTORIZZATI`, con la
+stessa convenzione. Le tre chiavi sono **indipendenti**: si può leggere i report senza poter
+registrare prelievi, ricevere le notifiche degli incassi senza vedere i saldi, e così via. Tutte
+*restringono* fra gli amministratori e non promuovono nessuno.
+
+Prelievi e report passano da `AutorizzazioniAdminService`; le notifiche sono lette dentro
+`DiscordService`, perché farle passare di lì creerebbe una dipendenza circolare — quel servizio
+serve proprio a sapere chi è amministratore.
 
 ### Come si aggiunge una riga
 
