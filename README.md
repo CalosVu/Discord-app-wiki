@@ -1,6 +1,6 @@
 # Discord-app-wiki
 
-**LLM Wiki** di **VuPass** — il prodotto della famiglia VuTradingFarm che gestisce gli accessi a
+**LLM Wiki** di **VuPass** — il prodotto della famiglia VuProject che gestisce gli accessi a
 pagamento a una community Discord. Il repository del codice si chiama
 [Discord-access-app](https://github.com/CalosVu/Discord-access-app). La wiki descrive la business
 logic realmente implementata (comandi, pagamenti, batch, modello dati,

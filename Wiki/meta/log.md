@@ -114,3 +114,9 @@ stderr di mysqldump allo stdout, inserendo warning ed errori dentro il file .sql
 (stderr su file .log separato, rimosso `--compress` deprecato e inutile su server locale).
 Aggiornata [[Tabella cfg_server]]: in produzione sono 14 configurazioni, non 9, di cui cinque
 non lette da alcun codice. Documentata la tabella `user_account`, priva di entita' corrispondente.
+
+## [2026-10-26] manutenzione | Il marchio VuTradingFarm diventa VuProject
+Dal 2026-10-25 il marchio ombrello si chiama VuProject (dominio `vuproject.it`, non ancora attivo). Aggiornato solo il
+nome della famiglia di prodotti in [[Panoramica]], `README.md` e `CLAUDE.md`. Restano col nome vecchio, finche' non
+cambiano davvero: il server Discord «VuTradingFarm», i domini `*.vutradingfarm.it`, l'email del footer e il valore del
+footer in produzione (V36, vedi [[Tabella cfg_server]]), che cambiera' con una migrazione nuova.
